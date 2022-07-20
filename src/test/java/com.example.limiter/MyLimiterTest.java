@@ -1,20 +1,60 @@
 package com.example.limiter;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class MyLimiterTest {
-    private final MyLimiter limiter = new MyLimiter(1, 1); // 10 request per 5 seconds
     private final StatisticService statisticService = new StatisticService();
     private final TestExternalService externalService = new TestExternalService(statisticService);
-    private final TestProducer producer = new TestProducer(limiter, externalService);
+
+    @BeforeEach
+    public void cleanHistory() {
+        statisticService.cleanHistory();
+    }
 
     @Test
-    public void test1() {
-        while (statisticService.getCountCountReceivedRequests() != 50) {
-            if (limiter.isPossibleSendRequest()) {
-                producer.sendFakeRequest();
+    public void test5RequestsPerSecond() {
+        try(MyLimiter limiter = new MyLimiter(5, 1)) {
+            TestProducer producer = new TestProducer(limiter, externalService);
+
+            while (statisticService.getCountCountReceivedRequests() != 50) {
+                if (limiter.isPossibleSendRequest()) {
+                    producer.sendFakeRequest();
+                }
             }
         }
+
+        // TODO add asserts
+    }
+
+    @Test
+    public void test10RequestsPerSecond() {
+        try(MyLimiter limiter = new MyLimiter(10, 1)) {
+            TestProducer producer = new TestProducer(limiter, externalService);
+
+            while (statisticService.getCountCountReceivedRequests() != 100) {
+                if (limiter.isPossibleSendRequest()) {
+                    producer.sendFakeRequest();
+                }
+            }
+        }
+
+        // TODO add asserts
+    }
+
+    @Test
+    public void test3RequestsPer3Second() {
+        try(MyLimiter limiter = new MyLimiter(3, 3)) {
+            TestProducer producer = new TestProducer(limiter, externalService);
+
+            while (statisticService.getCountCountReceivedRequests() != 100) {
+                if (limiter.isPossibleSendRequest()) {
+                    producer.sendFakeRequest();
+                }
+            }
+        }
+
+        // TODO add asserts
     }
 
 }

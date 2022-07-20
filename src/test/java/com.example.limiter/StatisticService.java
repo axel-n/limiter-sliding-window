@@ -34,4 +34,12 @@ public class StatisticService {
     public int getMaxRequestsInSeconds() {
         return getCountRequestsGroupedByTime().values().stream().max(Integer::compareTo).orElse(0);
     }
+
+    public void cleanHistory() {
+        int size = timeReceivedRequests.size();
+
+        for (int i = 0; i < size; i++) {
+            timeReceivedRequests.poll();
+        }
+    }
 }

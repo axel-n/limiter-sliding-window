@@ -1,14 +1,12 @@
 package com.example.limiter;
 
-import java.util.Iterator;
-import java.util.List;
+import java.io.Closeable;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import javax.annotation.PreDestroy;
 
-public class MyLimiter implements Cloneable {
+public class MyLimiter implements Closeable {
     private final int MAX_REQUESTS;
     private final int INTERVAL_SECONDS;
     private final Queue<Long> historyRequests = new ConcurrentLinkedQueue<>();
@@ -41,7 +39,7 @@ public class MyLimiter implements Cloneable {
                     // первый запрос уже старый, можно его убрать и смотреть дальше
                     historyRequests.poll();
 
-                    while(!historyRequests.isEmpty()) {
+                    while (!historyRequests.isEmpty()) {
                         Long current = historyRequests.element();
 
                         if (isOld(now, current, INTERVAL_SECONDS)) {
@@ -55,7 +53,7 @@ public class MyLimiter implements Cloneable {
             }
 
             try {
-                Thread.sleep(60);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e.getMessage());
             }
@@ -63,14 +61,14 @@ public class MyLimiter implements Cloneable {
     }
 
     private boolean isOld(Long now, Long timeRequest, int maxInterval) {
-       return (now - timeRequest) / 1000 > maxInterval;
+        long diffInMs = (now - timeRequest);
+        return diffInMs / 1000 > maxInterval;
     }
 
 
-    @PreDestroy
-    private void shutdown() {
+    @Override
+    public void close() {
         System.out.println("shutdown...");
         executor.shutdown();
     }
-
 }
