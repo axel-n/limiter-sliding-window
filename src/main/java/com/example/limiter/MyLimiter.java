@@ -8,14 +8,14 @@ import java.util.concurrent.Executors;
 
 public class MyLimiter implements Closeable {
     private final int MAX_REQUESTS;
-    private final int INTERVAL_SECONDS;
+    private final int INTERVAL_MS;
     private final Queue<Long> historyRequests = new ConcurrentLinkedQueue<>();
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
 
     public MyLimiter(int maxRequests, int intervalSeconds) {
         MAX_REQUESTS = maxRequests;
-        INTERVAL_SECONDS = intervalSeconds;
+        INTERVAL_MS = intervalSeconds * 1000;
 
         executor.execute(this::cleanHistory);
     }
@@ -33,42 +33,24 @@ public class MyLimiter implements Closeable {
             if (!historyRequests.isEmpty()) {
                 Long now = System.currentTimeMillis();
 
-                Long firstRequest = historyRequests.element();
-
-                if (isOld(now, firstRequest, INTERVAL_SECONDS)) {
-                    // первый запрос уже старый, можно его убрать и смотреть дальше
-                    historyRequests.poll();
-
-                    while (!historyRequests.isEmpty()) {
-                        Long current = historyRequests.element();
-
-                        if (isOld(now, current, INTERVAL_SECONDS)) {
-                            historyRequests.poll();
-                        } else {
-                            break;
-                        }
+                for (Long current : historyRequests) {
+                    if (isOld(now, current, INTERVAL_MS)) {
+                        historyRequests.poll();
+                    } else {
+                        break;
                     }
-
                 }
-            }
-
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e.getMessage());
             }
         }
     }
 
     private boolean isOld(Long now, Long timeRequest, int maxInterval) {
-        long diffInMs = (now - timeRequest);
-        return diffInMs / 1000 > maxInterval;
+        return (now - timeRequest) > maxInterval;
     }
 
 
     @Override
     public void close() {
-        System.out.println("shutdown...");
         executor.shutdown();
     }
 }

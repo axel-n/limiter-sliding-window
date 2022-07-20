@@ -9,12 +9,10 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class StatisticService {
-   private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-    //private final static ExecutorService executorService = Executors.newFixedThreadPool(1);
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     private final static Queue<Long> timeReceivedRequests = new ConcurrentLinkedQueue();
 
     public void saveTimeRequest(long timeRequest) {
-       // executorService.execute(() -> timeReceivedRequests.add(timeRequest));
         timeReceivedRequests.add(timeRequest);
     }
 
@@ -30,8 +28,6 @@ public class StatisticService {
             previousCountByTime++;
             requestsBySeconds.put(timeInSeconds, previousCountByTime);
         }
-
-        System.out.println(requestsBySeconds);
 
         return requestsBySeconds;
     }
