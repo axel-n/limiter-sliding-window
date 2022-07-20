@@ -12,7 +12,6 @@ public class MyLimiter implements Closeable {
     private final Queue<Long> historyRequests = new ConcurrentLinkedQueue<>();
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-
     public MyLimiter(int maxRequests, int intervalSeconds) {
         MAX_REQUESTS = maxRequests;
         INTERVAL_MS = intervalSeconds * 1000;
@@ -22,6 +21,10 @@ public class MyLimiter implements Closeable {
 
     public boolean isPossibleSendRequest() {
         return historyRequests.size() < MAX_REQUESTS;
+    }
+
+    public int remainRequests() {
+        return MAX_REQUESTS - historyRequests.size();
     }
 
     public void writeHistory() {
