@@ -1,5 +1,6 @@
 package com.example.limiter;
 
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +15,7 @@ public class MyLimiterTest {
 
     @Test
     public void test5RequestsPerSecond() {
-        try(MyLimiter limiter = new MyLimiter(5, 1)) {
+        try (MyLimiter limiter = new MyLimiter(5, 1)) {
             TestProducer producer = new TestProducer(limiter, externalService);
 
             while (statisticService.getCountCountReceivedRequests() != 50) {
@@ -24,12 +25,17 @@ public class MyLimiterTest {
             }
         }
 
+        List<String> datetimeList = statisticService.getHumanReadableStatistics();
+        for (String datetime : datetimeList) {
+            System.out.println(datetime);
+        }
+
         // TODO add asserts
     }
 
     @Test
     public void test10RequestsPerSecond() {
-        try(MyLimiter limiter = new MyLimiter(10, 1)) {
+        try (MyLimiter limiter = new MyLimiter(10, 1)) {
             TestProducer producer = new TestProducer(limiter, externalService);
 
             while (statisticService.getCountCountReceivedRequests() != 100) {
@@ -44,7 +50,7 @@ public class MyLimiterTest {
 
     @Test
     public void test3RequestsPer3Second() {
-        try(MyLimiter limiter = new MyLimiter(3, 3)) {
+        try (MyLimiter limiter = new MyLimiter(3, 3)) {
             TestProducer producer = new TestProducer(limiter, externalService);
 
             while (statisticService.getCountCountReceivedRequests() != 100) {

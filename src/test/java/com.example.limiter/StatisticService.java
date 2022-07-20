@@ -1,18 +1,21 @@
 package com.example.limiter;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class StatisticService {
-    private final static ExecutorService executorService = Executors.newFixedThreadPool(1);
+   private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    //private final static ExecutorService executorService = Executors.newFixedThreadPool(1);
     private final static Queue<Long> timeReceivedRequests = new ConcurrentLinkedQueue();
 
     public void saveTimeRequest(long timeRequest) {
-        executorService.execute(() -> timeReceivedRequests.add(timeRequest));
+       // executorService.execute(() -> timeReceivedRequests.add(timeRequest));
+        timeReceivedRequests.add(timeRequest);
     }
 
     public int getCountCountReceivedRequests() {
@@ -28,7 +31,23 @@ public class StatisticService {
             requestsBySeconds.put(timeInSeconds, previousCountByTime);
         }
 
+        System.out.println(requestsBySeconds);
+
         return requestsBySeconds;
+    }
+
+    public List<Long> getListReceivedTime() {
+        return new ArrayList<>(timeReceivedRequests);
+    }
+
+    public List<String> getHumanReadableStatistics() {
+        List<Long> timestamps = getListReceivedTime();
+        List<String> datetimeList = new ArrayList<>(timestamps.size());
+        for (Long timestamp : timestamps) {
+            datetimeList.add(dateFormat.format(timestamp));
+        }
+
+        return datetimeList;
     }
 
     public int getMaxRequestsInSeconds() {
