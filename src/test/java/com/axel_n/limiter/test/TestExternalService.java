@@ -1,4 +1,4 @@
-package com.example.limiter;
+package com.axel_n.limiter.test;
 
 public class TestExternalService {
     private final StatisticService statisticService;

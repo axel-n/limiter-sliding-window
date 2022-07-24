@@ -1,43 +1,42 @@
-package com.example.limiter;
+package com.axel_n.limiter.sliding_window;
 
+import com.axel_n.limiter.Limiter;
 import java.io.Closeable;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class MyLimiter implements Closeable {
-    private final int MAX_REQUESTS;
-    private final int INTERVAL_MS;
+public class LimiterSlidingWindow implements Limiter, Closeable {
+    private final int maxRequests;
+    private final int intervalSeconds;
     private final Queue<Long> historyRequests = new ConcurrentLinkedQueue<>();
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final ExecutorService cleanHistoryExecutor = Executors.newSingleThreadExecutor();
 
-    public MyLimiter(int maxRequests, int intervalSeconds) {
-        MAX_REQUESTS = maxRequests;
-        INTERVAL_MS = intervalSeconds * 1000;
+    public LimiterSlidingWindow(int maxRequests, int intervalSeconds) {
+        this.maxRequests = maxRequests;
+        this.intervalSeconds = intervalSeconds * 1000;
 
-        executor.execute(this::cleanHistory);
+        cleanHistoryExecutor.execute(this::cleanHistory);
     }
 
+    @Override
     public boolean isPossibleSendRequest() {
-        return historyRequests.size() < MAX_REQUESTS;
+        return historyRequests.size() < maxRequests;
     }
 
-    public int remainRequests() {
-        return MAX_REQUESTS - historyRequests.size();
-    }
-
+    @Override
     public void writeHistory() {
         historyRequests.add(System.currentTimeMillis());
     }
 
     private void cleanHistory() {
-        while (!executor.isShutdown()) {
+        while (!cleanHistoryExecutor.isShutdown()) {
             if (!historyRequests.isEmpty()) {
                 Long now = System.currentTimeMillis();
 
                 for (Long current : historyRequests) {
-                    if (isOld(now, current, INTERVAL_MS)) {
+                    if (isOld(now, current, intervalSeconds)) {
                         historyRequests.poll();
                     } else {
                         break;
@@ -54,6 +53,6 @@ public class MyLimiter implements Closeable {
 
     @Override
     public void close() {
-        executor.shutdown();
+        cleanHistoryExecutor.shutdown();
     }
 }

@@ -1,15 +1,19 @@
-package com.example.limiter;
+package com.axel_n.limiter.sliding_window;
 
+import com.axel_n.limiter.TestProducerMyLimiter;
+import com.axel_n.limiter.test.StatisticService;
+import com.axel_n.limiter.test.TestExternalService;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static com.axel_n.limiter.test.utils.NumberUtils.isGreaterOrEquals;
+import static com.axel_n.limiter.test.utils.NumberUtils.isLowerOrEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MyLimiterTest {
+public class LimiterSlidingWindowTest {
     private final StatisticService statisticService = new StatisticService();
     private final TestExternalService externalService = new TestExternalService(statisticService);
 
@@ -22,10 +26,14 @@ public class MyLimiterTest {
     public void test5RequestsPerSecond() {
         int maxRequestsPerPeriod = 5;
         int allRequests = 25;
-        long timeForeTest = System.currentTimeMillis();
 
-        try (MyLimiter limiter = new MyLimiter(maxRequestsPerPeriod, 1)) {
-            TestProducer producer = new TestProducer(limiter, externalService);
+        // TODO move logic for measure time to separated test
+        long timeForeTest;
+
+        try (LimiterSlidingWindow limiter = new LimiterSlidingWindow(maxRequestsPerPeriod, 1)) {
+            TestProducerMyLimiter producer = new TestProducerMyLimiter(limiter, externalService);
+
+            timeForeTest = System.currentTimeMillis();
 
             while (statisticService.getCountCountReceivedRequests() != allRequests) {
                 if (limiter.isPossibleSendRequest()) {
@@ -33,7 +41,6 @@ public class MyLimiterTest {
                 }
             }
         }
-
         long timeAfterTest = System.currentTimeMillis();
 
         int receivedMaxRequestsInSeconds = statisticService.getMaxRequestsInSeconds();
@@ -48,7 +55,7 @@ public class MyLimiterTest {
     }
 
     private BigDecimal calculateMaxFloorExecutionTime(BigDecimal executionTimeSeconds) {
-        // add 5 percent to value
+        // add 0.1 percent to value
         BigDecimal oneHundred = BigDecimal.valueOf(100);
         BigDecimal percentOfMaxFloor = BigDecimal.valueOf(0.1);
 
@@ -60,8 +67,8 @@ public class MyLimiterTest {
     @Test
     public void test10RequestsPerSecond() {
         int maxRequests = 10;
-        try (MyLimiter limiter = new MyLimiter(maxRequests, 1)) {
-            TestProducer producer = new TestProducer(limiter, externalService);
+        try (LimiterSlidingWindow limiter = new LimiterSlidingWindow(maxRequests, 1)) {
+            TestProducerMyLimiter producer = new TestProducerMyLimiter(limiter, externalService);
 
             while (statisticService.getCountCountReceivedRequests() != 100) {
                 if (limiter.isPossibleSendRequest()) {
@@ -77,8 +84,8 @@ public class MyLimiterTest {
     @Test
     public void test3RequestsPer3Second() {
         int maxRequests = 3;
-        try (MyLimiter limiter = new MyLimiter(3, 3)) {
-            TestProducer producer = new TestProducer(limiter, externalService);
+        try (LimiterSlidingWindow limiter = new LimiterSlidingWindow(3, 3)) {
+            TestProducerMyLimiter producer = new TestProducerMyLimiter(limiter, externalService);
 
             while (statisticService.getCountCountReceivedRequests() != 30) {
                 if (limiter.isPossibleSendRequest()) {
@@ -87,23 +94,15 @@ public class MyLimiterTest {
             }
         }
 
-        List<String> datetimeList = statisticService.getHumanReadableStatistics();
-        for (String datetime : datetimeList) {
-            System.out.println("datetime received request " + datetime);
-        }
-
         int receivedMaxRequestsInSeconds = statisticService.getMaxRequestsInSeconds();
         assertTrue(receivedMaxRequestsInSeconds >= 1);
         assertTrue(receivedMaxRequestsInSeconds <= maxRequests);
+
+
     }
 
-    private boolean isLowerOrEquals(BigDecimal executionTimeSeconds, BigDecimal maxFloorForExecutionTime) {
-        System.out.println(String.format("executionTimeSeconds=%s, maxFloorForExecutionTime=%s", executionTimeSeconds, maxFloorForExecutionTime));
-        return executionTimeSeconds.compareTo(maxFloorForExecutionTime) <= 0;
-    }
-
-    private boolean isGreaterOrEquals(BigDecimal executionTimeSeconds, BigDecimal approximatedExecutionTime) {
-        System.out.println(String.format("executionTimeSeconds=%s, approximatedExecutionTime=%s", executionTimeSeconds, approximatedExecutionTime));
-        return executionTimeSeconds.compareTo(approximatedExecutionTime) >= 0;
+    @Test
+    void checkExecutionTime() {
+        // TODO tests
     }
 }

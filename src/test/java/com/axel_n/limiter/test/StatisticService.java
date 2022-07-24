@@ -1,4 +1,4 @@
-package com.example.limiter;
+package com.axel_n.limiter.test;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class StatisticService {
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-    private final static Queue<Long> timeReceivedRequests = new ConcurrentLinkedQueue();
+    private final static Queue<Long> timeReceivedRequests = new ConcurrentLinkedQueue<>();
 
     public void saveTimeRequest(long timeRequest) {
         timeReceivedRequests.add(timeRequest);
