@@ -10,10 +10,11 @@ Some resources ([example1](https://www.bitmex.com/app/restAPI#Limits), [example2
 So application need to know (fast, without sent packets to any additional system) - can they send request or wait or skip
 
 ## How it works
-// (TODO ) add picture/schema about sliding window algorithm 
+![image info](./images/how_it_works.jpg)
 
 
 ## Plans
 - [ ] integrate deploy to maven repository
 - [ ] add examples of usage
 - [ ] add ability setup several limiters (for example 30 requests per 1 minute and 5 requests per second) 
+- [ ] add integration with monitoring 
