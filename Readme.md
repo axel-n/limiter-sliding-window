@@ -1,5 +1,7 @@
 # Rate limiter with sliding window algorithm
 
+[![Java CI with Maven](https://github.com/axel-n/limiter-sliding-window/actions/workflows/tests.yml/badge.svg)](https://github.com/axel-n/limiter-sliding-window/actions/workflows/tests.yml)
+
 ## Why another rate limiter?
 - this rate limiter is based on the algorithm sliding window
 - not found any solution in popular libraries (bucket4j, resilience4j, guava)
