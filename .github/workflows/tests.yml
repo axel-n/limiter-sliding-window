@@ -3,7 +3,11 @@
 
 name: tests
 
-on: [pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
 
 jobs:
   build:
