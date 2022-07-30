@@ -5,7 +5,9 @@ import com.axel_n.limiter.test.StatisticService;
 import com.axel_n.limiter.test.TestExternalService;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.logging.Logger;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static com.axel_n.limiter.test.utils.NumberUtils.isGreaterOrEquals;
@@ -70,7 +72,7 @@ public class LimiterSlidingWindowTest {
         try (LimiterSlidingWindow limiter = new LimiterSlidingWindow(maxRequests, 1)) {
             TestProducerMyLimiter producer = new TestProducerMyLimiter(limiter, externalService);
 
-            while (statisticService.getCountCountReceivedRequests() != 100) {
+            while (statisticService.getCountCountReceivedRequests() != 50) {
                 if (limiter.isPossibleSendRequest()) {
                     producer.sendFakeRequest();
                 }
@@ -87,7 +89,7 @@ public class LimiterSlidingWindowTest {
         try (LimiterSlidingWindow limiter = new LimiterSlidingWindow(3, 3)) {
             TestProducerMyLimiter producer = new TestProducerMyLimiter(limiter, externalService);
 
-            while (statisticService.getCountCountReceivedRequests() != 30) {
+            while (statisticService.getCountCountReceivedRequests() != 15) {
                 if (limiter.isPossibleSendRequest()) {
                     producer.sendFakeRequest();
                 }
