@@ -7,14 +7,24 @@
     <groupId>io.github.axel-n</groupId>
     <artifactId>limiter-sliding-window</artifactId>
     <version>0.1</version>
+    <packaging>jar</packaging>
+
+    <name>${project.groupId}:${project.artifactId}</name>
+    <description>Rate limiter with sliding window algorithm.</description>
+    <url>https://github.com/axel-n/limiter-sliding-window</url>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
-
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
 
 
     <dependencies>
@@ -75,4 +85,17 @@
         </pluginManagement>
     </build>
 
+    <scm>
+        <connection>scm:git:https://github.com/axel-n/limiter-sliding-window.git</connection>
+        <developerConnection>scm:git@github.com:axel-n/limiter-sliding-window.git</developerConnection>
+        <url>https://github.com/axel-n/limiter-sliding-window</url>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>axel-n</id>
+            <name>Alex Anoshkin</name>
+            <email>anoshkin.allex@gmail.com</email>
+        </developer>
+    </developers>
 </project>
