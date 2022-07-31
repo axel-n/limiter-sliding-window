@@ -6,7 +6,7 @@
 
     <groupId>com.axel_n</groupId>
     <artifactId>limiter-sliding-window</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.1</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
