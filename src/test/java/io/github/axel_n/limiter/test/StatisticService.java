@@ -1,4 +1,4 @@
-package com.axel_n.limiter.test;
+package io.github.axel_n.limiter.test;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

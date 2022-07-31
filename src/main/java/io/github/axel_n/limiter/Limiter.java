@@ -1,4 +1,4 @@
-package com.axel_n.limiter;
+package io.github.axel_n.limiter;
 
 public interface Limiter {
 

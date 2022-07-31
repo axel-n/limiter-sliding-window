@@ -1,4 +1,4 @@
-package com.axel_n.limiter.test.utils;
+package io.github.axel_n.limiter.test.utils;
 
 import java.math.BigDecimal;
 
