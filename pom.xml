@@ -4,17 +4,27 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.axel_n</groupId>
+    <groupId>io.github.axel-n</groupId>
     <artifactId>limiter-sliding-window</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.1</version>
+    <packaging>jar</packaging>
+
+    <name>${project.groupId}:${project.artifactId}</name>
+    <description>Rate limiter with sliding window algorithm.</description>
+    <url>https://github.com/axel-n/limiter-sliding-window</url>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
-
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
 
 
     <dependencies>
@@ -25,6 +35,43 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.2.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>net.nicoulaj.maven.plugins</groupId>
+                        <artifactId>checksum-maven-plugin</artifactId>
+                        <version>1.10</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>artifacts</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <build>
         <pluginManagement>
@@ -38,4 +85,17 @@
         </pluginManagement>
     </build>
 
+    <scm>
+        <connection>scm:git:https://github.com/axel-n/limiter-sliding-window.git</connection>
+        <developerConnection>scm:git@github.com:axel-n/limiter-sliding-window.git</developerConnection>
+        <url>https://github.com/axel-n/limiter-sliding-window</url>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>axel-n</id>
+            <name>Alex Anoshkin</name>
+            <email>anoshkin.allex@gmail.com</email>
+        </developer>
+    </developers>
 </project>

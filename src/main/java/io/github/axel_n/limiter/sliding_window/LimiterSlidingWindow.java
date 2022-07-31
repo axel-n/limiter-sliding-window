@@ -1,6 +1,6 @@
-package com.axel_n.limiter.sliding_window;
+package io.github.axel_n.limiter.sliding_window;
 
-import com.axel_n.limiter.Limiter;
+import io.github.axel_n.limiter.Limiter;
 import java.io.Closeable;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;

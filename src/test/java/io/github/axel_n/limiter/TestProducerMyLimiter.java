@@ -1,7 +1,7 @@
-package com.axel_n.limiter;
+package io.github.axel_n.limiter;
 
-import com.axel_n.limiter.sliding_window.LimiterSlidingWindow;
-import com.axel_n.limiter.test.TestExternalService;
+import io.github.axel_n.limiter.sliding_window.LimiterSlidingWindow;
+import io.github.axel_n.limiter.test.TestExternalService;
 
 public class TestProducerMyLimiter {
     private final LimiterSlidingWindow limiter;

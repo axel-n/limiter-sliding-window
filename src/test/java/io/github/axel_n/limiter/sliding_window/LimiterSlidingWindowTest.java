@@ -1,17 +1,15 @@
-package com.axel_n.limiter.sliding_window;
+package io.github.axel_n.limiter.sliding_window;
 
-import com.axel_n.limiter.TestProducerMyLimiter;
-import com.axel_n.limiter.test.StatisticService;
-import com.axel_n.limiter.test.TestExternalService;
+import io.github.axel_n.limiter.TestProducerMyLimiter;
+import io.github.axel_n.limiter.test.StatisticService;
+import io.github.axel_n.limiter.test.TestExternalService;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.logging.Logger;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import static com.axel_n.limiter.test.utils.NumberUtils.isGreaterOrEquals;
-import static com.axel_n.limiter.test.utils.NumberUtils.isLowerOrEquals;
+import static io.github.axel_n.limiter.test.utils.NumberUtils.isGreaterOrEquals;
+import static io.github.axel_n.limiter.test.utils.NumberUtils.isLowerOrEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
