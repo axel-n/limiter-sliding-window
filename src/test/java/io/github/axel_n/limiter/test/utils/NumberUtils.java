@@ -1,13 +1,19 @@
 package io.github.axel_n.limiter.test.utils;
 
-import java.math.BigDecimal;
-
 public class NumberUtils {
-    public static boolean isLowerOrEquals(BigDecimal executionTimeSeconds, BigDecimal maxFloorForExecutionTime) {
-        return executionTimeSeconds.compareTo(maxFloorForExecutionTime) <= 0;
+    public static double getExecutionTime(long timeAfterTest, long timeBeforeTest) {
+       return  ((double) timeAfterTest - (double) timeBeforeTest) / 1_000 ;
     }
 
-    public static boolean isGreaterOrEquals(BigDecimal executionTimeSeconds, BigDecimal approximatedExecutionTime) {
-        return executionTimeSeconds.compareTo(approximatedExecutionTime) >= 0;
+    public static double calculateMaxFloorExecutionTime(double executionTimeSeconds) {
+        double percentOfMaxFloor = 0.1;
+
+        double somePercent = (executionTimeSeconds / 100) * percentOfMaxFloor;
+        return somePercent + executionTimeSeconds;
     }
+
+    public static double getApproximatedExecutionTime(int allRequests, int maxRequestsPerPeriod) {
+        return (double) allRequests / (double) maxRequestsPerPeriod - 1;
+    }
+
 }

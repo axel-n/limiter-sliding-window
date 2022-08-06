@@ -3,13 +3,12 @@ package io.github.axel_n.limiter.sliding_window;
 import io.github.axel_n.limiter.TestProducerMyLimiter;
 import io.github.axel_n.limiter.test.StatisticService;
 import io.github.axel_n.limiter.test.TestExternalService;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static io.github.axel_n.limiter.test.utils.NumberUtils.isGreaterOrEquals;
-import static io.github.axel_n.limiter.test.utils.NumberUtils.isLowerOrEquals;
+import static io.github.axel_n.limiter.test.utils.NumberUtils.calculateMaxFloorExecutionTime;
+import static io.github.axel_n.limiter.test.utils.NumberUtils.getApproximatedExecutionTime;
+import static io.github.axel_n.limiter.test.utils.NumberUtils.getExecutionTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -26,14 +25,57 @@ public class LimiterSlidingWindowTest {
     public void test5RequestsPerSecond() {
         int maxRequestsPerPeriod = 5;
         int allRequests = 25;
+        int intervalSeconds = 1;
 
-        // TODO move logic for measure time to separated test
-        long timeForeTest;
+        validateLimiter(allRequests, maxRequestsPerPeriod, intervalSeconds);
+    }
 
-        try (LimiterSlidingWindow limiter = new LimiterSlidingWindow(maxRequestsPerPeriod, 1)) {
+    @Test
+    public void test10RequestsPerSecond() {
+        int maxRequestsPerPeriod = 10;
+        int allRequests = 50;
+        int intervalSeconds = 1;
+
+        validateLimiter(allRequests, maxRequestsPerPeriod, intervalSeconds);
+    }
+
+    @Test
+    public void test3RequestsPer3Second() {
+        int maxRequestsPerPeriod = 3;
+        int allRequests = 15;
+        int intervalSeconds = 3;
+
+        validateLimiter(allRequests, maxRequestsPerPeriod, intervalSeconds);
+    }
+
+    private void validateLimiter(int allRequests, int maxRequestsPerPeriod, int intervalSeconds) {
+        long timeBeforeTest = System.currentTimeMillis();
+
+        sendFakeRequestsWithLimiter(allRequests, maxRequestsPerPeriod, intervalSeconds);
+
+        long timeAfterTest = System.currentTimeMillis();
+
+        int receivedMaxRequestsInSeconds = statisticService.getMaxRequestsInSeconds();
+
+        if (intervalSeconds == 1) {
+            assertEquals(maxRequestsPerPeriod, receivedMaxRequestsInSeconds);
+        } else {
+            assertTrue(receivedMaxRequestsInSeconds >= 1);
+            assertTrue(receivedMaxRequestsInSeconds <= maxRequestsPerPeriod);
+        }
+
+        double executionTimeSeconds = getExecutionTime(timeAfterTest, timeBeforeTest);
+        double approximatedExecutionTime = getApproximatedExecutionTime(allRequests, maxRequestsPerPeriod);
+        assertTrue(executionTimeSeconds >= approximatedExecutionTime);
+
+        double maxFloorForExecutionTime = calculateMaxFloorExecutionTime(executionTimeSeconds);
+        assertTrue(executionTimeSeconds <= maxFloorForExecutionTime);
+    }
+
+    private void sendFakeRequestsWithLimiter(int allRequests, int maxRequestsPerPeriod, int intervalSeconds) {
+
+        try (LimiterSlidingWindow limiter = new LimiterSlidingWindow(maxRequestsPerPeriod, intervalSeconds)) {
             TestProducerMyLimiter producer = new TestProducerMyLimiter(limiter, externalService);
-
-            timeForeTest = System.currentTimeMillis();
 
             while (statisticService.getCountCountReceivedRequests() != allRequests) {
                 if (limiter.isPossibleSendRequest()) {
@@ -41,68 +83,5 @@ public class LimiterSlidingWindowTest {
                 }
             }
         }
-        long timeAfterTest = System.currentTimeMillis();
-
-        int receivedMaxRequestsInSeconds = statisticService.getMaxRequestsInSeconds();
-        assertEquals(maxRequestsPerPeriod, receivedMaxRequestsInSeconds);
-
-        BigDecimal executionTimeSeconds = BigDecimal.valueOf(timeAfterTest - timeForeTest).divide(BigDecimal.valueOf(1000), 4, RoundingMode.HALF_UP);
-        BigDecimal approximatedExecutionTime = BigDecimal.valueOf(4); // TODO how to calculate it?
-        assertTrue(isGreaterOrEquals(executionTimeSeconds, approximatedExecutionTime));
-
-        BigDecimal maxFloorForExecutionTime = calculateMaxFloorExecutionTime(executionTimeSeconds);
-        assertTrue(isLowerOrEquals(executionTimeSeconds, maxFloorForExecutionTime));
-    }
-
-    private BigDecimal calculateMaxFloorExecutionTime(BigDecimal executionTimeSeconds) {
-        // add 0.1 percent to value
-        BigDecimal oneHundred = BigDecimal.valueOf(100);
-        BigDecimal percentOfMaxFloor = BigDecimal.valueOf(0.1);
-
-        BigDecimal fivePercent = executionTimeSeconds.divide(oneHundred, 4, RoundingMode.HALF_UP).multiply(percentOfMaxFloor);
-        return fivePercent.add(executionTimeSeconds);
-    }
-
-
-    @Test
-    public void test10RequestsPerSecond() {
-        int maxRequests = 10;
-        try (LimiterSlidingWindow limiter = new LimiterSlidingWindow(maxRequests, 1)) {
-            TestProducerMyLimiter producer = new TestProducerMyLimiter(limiter, externalService);
-
-            while (statisticService.getCountCountReceivedRequests() != 50) {
-                if (limiter.isPossibleSendRequest()) {
-                    producer.sendFakeRequest();
-                }
-            }
-        }
-
-        int receivedMaxRequestsInSeconds = statisticService.getMaxRequestsInSeconds();
-        assertEquals(maxRequests, receivedMaxRequestsInSeconds);
-    }
-
-    @Test
-    public void test3RequestsPer3Second() {
-        int maxRequests = 3;
-        try (LimiterSlidingWindow limiter = new LimiterSlidingWindow(3, 3)) {
-            TestProducerMyLimiter producer = new TestProducerMyLimiter(limiter, externalService);
-
-            while (statisticService.getCountCountReceivedRequests() != 15) {
-                if (limiter.isPossibleSendRequest()) {
-                    producer.sendFakeRequest();
-                }
-            }
-        }
-
-        int receivedMaxRequestsInSeconds = statisticService.getMaxRequestsInSeconds();
-        assertTrue(receivedMaxRequestsInSeconds >= 1);
-        assertTrue(receivedMaxRequestsInSeconds <= maxRequests);
-
-
-    }
-
-    @Test
-    void checkExecutionTime() {
-        // TODO tests
     }
 }
