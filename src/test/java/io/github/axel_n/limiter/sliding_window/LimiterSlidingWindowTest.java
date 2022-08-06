@@ -25,25 +25,44 @@ public class LimiterSlidingWindowTest {
     public void test5RequestsPerSecond() {
         int maxRequestsPerPeriod = 5;
         int allRequests = 25;
+        int intervalSeconds = 1;
 
-        // TODO move logic for measure time to separated test
-        long timeBeforeTest;
+        validateLimiter(allRequests, maxRequestsPerPeriod, intervalSeconds);
+    }
 
-        try (LimiterSlidingWindow limiter = new LimiterSlidingWindow(maxRequestsPerPeriod, 1)) {
-            TestProducerMyLimiter producer = new TestProducerMyLimiter(limiter, externalService);
+    @Test
+    public void test10RequestsPerSecond() {
+        int maxRequestsPerPeriod = 10;
+        int allRequests = 50;
+        int intervalSeconds = 1;
 
-            timeBeforeTest = System.currentTimeMillis();
+        validateLimiter(allRequests, maxRequestsPerPeriod, intervalSeconds);
+    }
 
-            while (statisticService.getCountCountReceivedRequests() != allRequests) {
-                if (limiter.isPossibleSendRequest()) {
-                    producer.sendFakeRequest();
-                }
-            }
-        }
+    @Test
+    public void test3RequestsPer3Second() {
+        int maxRequestsPerPeriod = 3;
+        int allRequests = 15;
+        int intervalSeconds = 3;
+
+        validateLimiter(allRequests, maxRequestsPerPeriod, intervalSeconds);
+    }
+
+    private void validateLimiter(int allRequests, int maxRequestsPerPeriod, int intervalSeconds) {
+        long timeBeforeTest = System.currentTimeMillis();
+
+        sendFakeRequestsWithLimiter(allRequests, maxRequestsPerPeriod, intervalSeconds);
+
         long timeAfterTest = System.currentTimeMillis();
 
         int receivedMaxRequestsInSeconds = statisticService.getMaxRequestsInSeconds();
-        assertEquals(maxRequestsPerPeriod, receivedMaxRequestsInSeconds);
+
+        if (intervalSeconds == 1) {
+            assertEquals(maxRequestsPerPeriod, receivedMaxRequestsInSeconds);
+        } else {
+            assertTrue(receivedMaxRequestsInSeconds >= 1);
+            assertTrue(receivedMaxRequestsInSeconds <= maxRequestsPerPeriod);
+        }
 
         double executionTimeSeconds = getExecutionTime(timeAfterTest, timeBeforeTest);
         double approximatedExecutionTime = getApproximatedExecutionTime(allRequests, maxRequestsPerPeriod);
@@ -53,46 +72,16 @@ public class LimiterSlidingWindowTest {
         assertTrue(executionTimeSeconds <= maxFloorForExecutionTime);
     }
 
+    private void sendFakeRequestsWithLimiter(int allRequests, int maxRequestsPerPeriod, int intervalSeconds) {
 
-    @Test
-    public void test10RequestsPerSecond() {
-        int maxRequests = 10;
-        try (LimiterSlidingWindow limiter = new LimiterSlidingWindow(maxRequests, 1)) {
+        try (LimiterSlidingWindow limiter = new LimiterSlidingWindow(maxRequestsPerPeriod, intervalSeconds)) {
             TestProducerMyLimiter producer = new TestProducerMyLimiter(limiter, externalService);
 
-            while (statisticService.getCountCountReceivedRequests() != 50) {
+            while (statisticService.getCountCountReceivedRequests() != allRequests) {
                 if (limiter.isPossibleSendRequest()) {
                     producer.sendFakeRequest();
                 }
             }
         }
-
-        int receivedMaxRequestsInSeconds = statisticService.getMaxRequestsInSeconds();
-        assertEquals(maxRequests, receivedMaxRequestsInSeconds);
-    }
-
-    @Test
-    public void test3RequestsPer3Second() {
-        int maxRequests = 3;
-        try (LimiterSlidingWindow limiter = new LimiterSlidingWindow(3, 3)) {
-            TestProducerMyLimiter producer = new TestProducerMyLimiter(limiter, externalService);
-
-            while (statisticService.getCountCountReceivedRequests() != 15) {
-                if (limiter.isPossibleSendRequest()) {
-                    producer.sendFakeRequest();
-                }
-            }
-        }
-
-        int receivedMaxRequestsInSeconds = statisticService.getMaxRequestsInSeconds();
-        assertTrue(receivedMaxRequestsInSeconds >= 1);
-        assertTrue(receivedMaxRequestsInSeconds <= maxRequests);
-
-
-    }
-
-    @Test
-    void checkExecutionTime() {
-        // TODO tests
     }
 }
