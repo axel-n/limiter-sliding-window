@@ -3,13 +3,11 @@ package io.github.axel_n.limiter.sliding_window;
 import io.github.axel_n.limiter.TestProducerMyLimiter;
 import io.github.axel_n.limiter.test.StatisticService;
 import io.github.axel_n.limiter.test.TestExternalService;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static io.github.axel_n.limiter.test.utils.NumberUtils.isGreaterOrEquals;
-import static io.github.axel_n.limiter.test.utils.NumberUtils.isLowerOrEquals;
+import static io.github.axel_n.limiter.test.utils.NumberUtils.calculateMaxFloorExecutionTime;
+import static io.github.axel_n.limiter.test.utils.NumberUtils.getExecutionTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -28,12 +26,12 @@ public class LimiterSlidingWindowTest {
         int allRequests = 25;
 
         // TODO move logic for measure time to separated test
-        long timeForeTest;
+        long timeBeforeTest;
 
         try (LimiterSlidingWindow limiter = new LimiterSlidingWindow(maxRequestsPerPeriod, 1)) {
             TestProducerMyLimiter producer = new TestProducerMyLimiter(limiter, externalService);
 
-            timeForeTest = System.currentTimeMillis();
+            timeBeforeTest = System.currentTimeMillis();
 
             while (statisticService.getCountCountReceivedRequests() != allRequests) {
                 if (limiter.isPossibleSendRequest()) {
@@ -46,21 +44,12 @@ public class LimiterSlidingWindowTest {
         int receivedMaxRequestsInSeconds = statisticService.getMaxRequestsInSeconds();
         assertEquals(maxRequestsPerPeriod, receivedMaxRequestsInSeconds);
 
-        BigDecimal executionTimeSeconds = BigDecimal.valueOf(timeAfterTest - timeForeTest).divide(BigDecimal.valueOf(1000), 4, RoundingMode.HALF_UP);
-        BigDecimal approximatedExecutionTime = BigDecimal.valueOf(4); // TODO how to calculate it?
-        assertTrue(isGreaterOrEquals(executionTimeSeconds, approximatedExecutionTime));
+        double executionTimeSeconds = getExecutionTime(timeAfterTest, timeBeforeTest);
+        double approximatedExecutionTime = 4.0; // TODO how to calculate it?
+        assertTrue(executionTimeSeconds >= approximatedExecutionTime);
 
-        BigDecimal maxFloorForExecutionTime = calculateMaxFloorExecutionTime(executionTimeSeconds);
-        assertTrue(isLowerOrEquals(executionTimeSeconds, maxFloorForExecutionTime));
-    }
-
-    private BigDecimal calculateMaxFloorExecutionTime(BigDecimal executionTimeSeconds) {
-        // add 0.1 percent to value
-        BigDecimal oneHundred = BigDecimal.valueOf(100);
-        BigDecimal percentOfMaxFloor = BigDecimal.valueOf(0.1);
-
-        BigDecimal fivePercent = executionTimeSeconds.divide(oneHundred, 4, RoundingMode.HALF_UP).multiply(percentOfMaxFloor);
-        return fivePercent.add(executionTimeSeconds);
+        double maxFloorForExecutionTime = calculateMaxFloorExecutionTime(executionTimeSeconds);
+        assertTrue(executionTimeSeconds <= maxFloorForExecutionTime);
     }
 
 
