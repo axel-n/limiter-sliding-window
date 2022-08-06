@@ -1,8 +1,10 @@
 package io.github.axel_n.limiter.sliding_window;
 
 import io.github.axel_n.limiter.TestProducerMyLimiter;
+import io.github.axel_n.limiter.config.LimiterConfigBuilder;
 import io.github.axel_n.limiter.test.StatisticService;
 import io.github.axel_n.limiter.test.TestExternalService;
+import java.time.Duration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -74,7 +76,11 @@ public class LimiterSlidingWindowTest {
 
     private void sendFakeRequestsWithLimiter(int allRequests, int maxRequestsPerPeriod, int intervalSeconds) {
 
-        try (LimiterSlidingWindow limiter = new LimiterSlidingWindow(maxRequestsPerPeriod, intervalSeconds)) {
+        try (LimiterSlidingWindow limiter = new LimiterSlidingWindow(new LimiterConfigBuilder()
+                .setInterval(Duration.ofSeconds(intervalSeconds))
+                .setMaxRequestsInInterval(maxRequestsPerPeriod)
+                .build())
+        ) {
             TestProducerMyLimiter producer = new TestProducerMyLimiter(limiter, externalService);
 
             while (statisticService.getCountCountReceivedRequests() != allRequests) {

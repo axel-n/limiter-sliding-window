@@ -1,6 +1,7 @@
 package io.github.axel_n.limiter.sliding_window;
 
 import io.github.axel_n.limiter.Limiter;
+import io.github.axel_n.limiter.config.LimiterConfig;
 import java.io.Closeable;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -9,13 +10,13 @@ import java.util.concurrent.Executors;
 
 public class LimiterSlidingWindow implements Limiter, Closeable {
     private final int maxRequests;
-    private final int intervalSeconds;
+    private final int intervalInMilliseconds;
     private final Queue<Long> historyRequests = new ConcurrentLinkedQueue<>();
     private final ExecutorService cleanHistoryExecutor = Executors.newSingleThreadExecutor();
 
-    public LimiterSlidingWindow(int maxRequests, int intervalSeconds) {
-        this.maxRequests = maxRequests;
-        this.intervalSeconds = intervalSeconds * 1000;
+    public LimiterSlidingWindow(LimiterConfig config) {
+        this.maxRequests = config.getMaxRequestsInInterval();
+        this.intervalInMilliseconds = (int) config.getInterval().toMillis();
 
         cleanHistoryExecutor.execute(this::cleanHistory);
     }
@@ -33,10 +34,10 @@ public class LimiterSlidingWindow implements Limiter, Closeable {
     private void cleanHistory() {
         while (!cleanHistoryExecutor.isShutdown()) {
             if (!historyRequests.isEmpty()) {
-                Long now = System.currentTimeMillis();
+                long now = System.currentTimeMillis();
 
-                for (Long current : historyRequests) {
-                    if (isOld(now, current, intervalSeconds)) {
+                for (long current : historyRequests) {
+                    if (isOld(now, current, intervalInMilliseconds)) {
                         historyRequests.poll();
                     } else {
                         break;
@@ -46,7 +47,7 @@ public class LimiterSlidingWindow implements Limiter, Closeable {
         }
     }
 
-    private boolean isOld(Long now, Long timeRequest, int maxInterval) {
+    private boolean isOld(long now, long timeRequest, int maxInterval) {
         return (now - timeRequest) > maxInterval;
     }
 
