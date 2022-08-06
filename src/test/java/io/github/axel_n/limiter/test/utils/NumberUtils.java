@@ -12,4 +12,8 @@ public class NumberUtils {
         return somePercent + executionTimeSeconds;
     }
 
+    public static double getApproximatedExecutionTime(int allRequests, int maxRequestsPerPeriod) {
+        return (double) allRequests / (double) maxRequestsPerPeriod - 1;
+    }
+
 }

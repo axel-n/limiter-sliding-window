@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static io.github.axel_n.limiter.test.utils.NumberUtils.calculateMaxFloorExecutionTime;
+import static io.github.axel_n.limiter.test.utils.NumberUtils.getApproximatedExecutionTime;
 import static io.github.axel_n.limiter.test.utils.NumberUtils.getExecutionTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -45,7 +46,7 @@ public class LimiterSlidingWindowTest {
         assertEquals(maxRequestsPerPeriod, receivedMaxRequestsInSeconds);
 
         double executionTimeSeconds = getExecutionTime(timeAfterTest, timeBeforeTest);
-        double approximatedExecutionTime = 4.0; // TODO how to calculate it?
+        double approximatedExecutionTime = getApproximatedExecutionTime(allRequests, maxRequestsPerPeriod);
         assertTrue(executionTimeSeconds >= approximatedExecutionTime);
 
         double maxFloorForExecutionTime = calculateMaxFloorExecutionTime(executionTimeSeconds);
