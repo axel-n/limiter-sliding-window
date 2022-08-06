@@ -2,7 +2,7 @@
 
 [![Java CI with Maven](https://github.com/axel-n/limiter-sliding-window/actions/workflows/tests.yml/badge.svg)](https://github.com/axel-n/limiter-sliding-window/actions/workflows/tests.yml)
 
-## Why another rate limiter?
+## Why need another rate limiter?
 - this rate limiter is based on the algorithm sliding window
 - not found any solution in popular libraries (bucket4j, resilience4j, guava)
 
@@ -11,7 +11,7 @@ Some resources ([example1](https://www.bitmex.com/app/restAPI#Limits), [example2
 
 So application need to know (fast, without sent packets to any additional system) - can they send request or wait or skip
 
-## How it works
+## How it works sliding window algorithm
 ![image info](./images/how_it_works.jpg)
 
 
