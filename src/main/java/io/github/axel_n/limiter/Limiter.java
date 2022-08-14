@@ -12,10 +12,10 @@ public interface Limiter<T> {
     // execute or wait
     void executeOrWait(Runnable runnable) throws ReachedLimitException;
     void executeOrWait(Runnable runnable, Duration maxTimeWait) throws ReachedLimitException;
-    void executeOrWait(Callable<T> callable) throws ReachedLimitException;
-    void executeOrWait(Callable<T> callable, Duration maxTimeWait) throws ReachedLimitException;
+    T executeOrWait(Callable<T> callable) throws ReachedLimitException;
+    T executeOrWait(Callable<T> callable, Duration maxTimeWait) throws ReachedLimitException;
 
     // execute or throw exception
     void executeOrThrowException(Runnable runnable) throws ReachedLimitException;
-    void executeOrThrowException(Callable<T> callable) throws ReachedLimitException;
+    T executeOrThrowException(Callable<T> callable) throws ReachedLimitException;
 }
