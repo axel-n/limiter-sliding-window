@@ -2,13 +2,13 @@ package io.github.axel_n.limiter.sliding_window;
 
 import io.github.axel_n.limiter.Limiter;
 import io.github.axel_n.limiter.config.LimiterConfig;
-import java.io.Closeable;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import javax.annotation.PreDestroy;
 
-public class LimiterSlidingWindow implements Limiter, Closeable {
+public class LimiterSlidingWindow implements Limiter {
     private final int maxRequests;
     private final int intervalInMilliseconds;
     private final Queue<Long> historyRequests = new ConcurrentLinkedQueue<>();
@@ -21,6 +21,11 @@ public class LimiterSlidingWindow implements Limiter, Closeable {
         cleanHistoryExecutor.execute(this::cleanHistory);
     }
 
+    /**
+     * Do not forget call method writeHistory() for keep history
+     *
+     * @return true is sent request in period lower than maxRequests
+     */
     @Override
     public boolean isPossibleSendRequest() {
         return historyRequests.size() < maxRequests;
@@ -32,7 +37,7 @@ public class LimiterSlidingWindow implements Limiter, Closeable {
     }
 
     private void cleanHistory() {
-        while (!cleanHistoryExecutor.isShutdown()) {
+        while (!Thread.interrupted()) {
             if (!historyRequests.isEmpty()) {
                 long now = System.currentTimeMillis();
 
@@ -52,8 +57,8 @@ public class LimiterSlidingWindow implements Limiter, Closeable {
     }
 
 
-    @Override
-    public void close() {
+    @PreDestroy
+    private void close() {
         cleanHistoryExecutor.shutdown();
     }
 }
