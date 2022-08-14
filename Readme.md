@@ -11,6 +11,21 @@ Some resources ([example1](https://www.bitmex.com/app/restAPI#Limits), [example2
 
 So application need to know (fast, without sent packets to any additional system) - can they send request or wait or skip
 
+## How to use 
+### add dependency for Maven 
+```
+<dependency>
+    <groupId>io.github.axel-n</groupId>
+    <artifactId>limiter-sliding-window</artifactId>
+    <version>0.1</version>
+</dependency>
+```
+
+### add dependency for Gradle
+```
+compile "io.github.axel-n:limiter-sliding-window:0.1"
+```
+
 ## How it works sliding window algorithm
 ![image info](./images/how_it_works.jpg)
 
