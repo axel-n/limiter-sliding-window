@@ -16,7 +16,7 @@ So application need to know (fast, without sent packets to any additional system
 
 
 ## Plans
-- [ ] integrate deploy to maven repository
-- [ ] add examples of usage
+- [x] integrate deploy to maven repository
+- [x] add examples of usage
 - [ ] add ability setup several limiters (for example 30 requests per 1 minute and 5 requests per second) 
 - [ ] add integration with monitoring 
