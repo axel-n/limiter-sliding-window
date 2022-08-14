@@ -6,18 +6,17 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import javax.annotation.PreDestroy;
 
 public class LimiterSlidingWindow implements Limiter {
     private final int maxRequests;
     private final int intervalInMilliseconds;
     private final Queue<Long> historyRequests = new ConcurrentLinkedQueue<>();
-    private final ExecutorService cleanHistoryExecutor = Executors.newSingleThreadExecutor();
 
     public LimiterSlidingWindow(LimiterConfig config) {
         this.maxRequests = config.getMaxRequestsInInterval();
         this.intervalInMilliseconds = (int) config.getInterval().toMillis();
 
+        ExecutorService cleanHistoryExecutor = Executors.newSingleThreadExecutor();
         cleanHistoryExecutor.execute(this::cleanHistory);
     }
 
@@ -54,11 +53,5 @@ public class LimiterSlidingWindow implements Limiter {
 
     private boolean isOld(long now, long timeRequest, int maxInterval) {
         return (now - timeRequest) > maxInterval;
-    }
-
-
-    @PreDestroy
-    private void close() {
-        cleanHistoryExecutor.shutdown();
     }
 }
