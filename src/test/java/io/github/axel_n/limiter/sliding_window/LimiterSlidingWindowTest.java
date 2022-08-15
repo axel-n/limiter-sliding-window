@@ -77,7 +77,7 @@ public class LimiterSlidingWindowTest {
     }
 
     private void sendFakeRequestsWithLimiter(int allRequests, int maxRequestsPerPeriod, int intervalSeconds) {
-        LimiterSlidingWindow limiter = new LimiterSlidingWindow(new LimiterConfigBuilder()
+        LimiterSlidingWindow<Void> limiter = new LimiterSlidingWindow<>(new LimiterConfigBuilder()
                 .setInterval(Duration.ofSeconds(intervalSeconds))
                 .setMaxRequestsInInterval(maxRequestsPerPeriod)
                 .build());

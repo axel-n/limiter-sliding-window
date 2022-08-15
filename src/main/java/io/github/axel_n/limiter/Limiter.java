@@ -2,6 +2,7 @@ package io.github.axel_n.limiter;
 
 import io.github.axel_n.limiter.exception.ReachedLimitException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeoutException;
 
 public interface Limiter<T> {
     // manual check ability sent request
@@ -10,8 +11,8 @@ public interface Limiter<T> {
 
 
     // execute or wait
-    void executeOrWait(Runnable runnable) throws ReachedLimitException, InterruptedException;
-    void executeOrWait(Runnable runnable, long maxTimeWaitInMilliseconds) throws ReachedLimitException, InterruptedException;
+    void executeOrWait(Runnable runnable) throws ReachedLimitException, TimeoutException;
+    void executeOrWait(Runnable runnable, long maxTimeWaitInMilliseconds) throws ReachedLimitException, TimeoutException;
     T executeOrWait(Callable<T> callable) throws Exception;
     T executeOrWait(Callable<T> callable, long maxTimeWaitInMilliseconds) throws Exception;
 

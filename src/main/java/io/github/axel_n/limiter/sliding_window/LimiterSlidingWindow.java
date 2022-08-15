@@ -8,6 +8,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeoutException;
 
 public class LimiterSlidingWindow<T> implements Limiter<T> {
     private final int maxRequests;
@@ -44,26 +45,31 @@ public class LimiterSlidingWindow<T> implements Limiter<T> {
 
 
     @Override
-    public void executeOrWait(Runnable runnable) throws ReachedLimitException, InterruptedException {
+    public void executeOrWait(Runnable runnable) throws ReachedLimitException, TimeoutException {
         executeOrWait(runnable, maxAwaitExecutionTimeInMilliseconds);
     }
 
 
     @Override
-    public void executeOrWait(Runnable runnable, long maxTimeWaitInMilliseconds) throws ReachedLimitException, InterruptedException {
+    public void executeOrWait(Runnable runnable, long maxTimeWaitInMilliseconds) throws ReachedLimitException, TimeoutException {
         long timeBeforeAwait = System.currentTimeMillis();
 
-        while (!isPossibleSendRequest()) {
-            long now = System.currentTimeMillis();
-            long diff = now - timeBeforeAwait;
-            if (diff >= maxTimeWaitInMilliseconds) {
-                throw new InterruptedException();
+        synchronized (this) {
+            // TODO refactor
+            while (!isPossibleSendRequest()) {
+                long now = System.currentTimeMillis();
+                long diff = now - timeBeforeAwait;
+                if (diff >= maxTimeWaitInMilliseconds) {
+                    throw new TimeoutException();
+                }
+                try {
+                    Thread.sleep(intervalForCheckExecutionInMilliseconds);
+                } catch (InterruptedException ignored) {}
             }
-            Thread.sleep(intervalForCheckExecutionInMilliseconds);
-        }
 
-        runnable.run();
-        writeHistory();
+            runnable.run();
+            writeHistory();
+        }
     }
 
     @Override
@@ -81,7 +87,10 @@ public class LimiterSlidingWindow<T> implements Limiter<T> {
             if (diff >= maxTimeWaitInMilliseconds) {
                 throw new InterruptedException();
             }
-            Thread.sleep(intervalForCheckExecutionInMilliseconds);
+
+            try {
+                Thread.sleep(intervalForCheckExecutionInMilliseconds);
+            } catch (Exception ignored) {}
         }
 
         T result = callable.call();
