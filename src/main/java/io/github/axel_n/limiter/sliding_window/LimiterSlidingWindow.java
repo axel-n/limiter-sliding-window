@@ -42,10 +42,12 @@ public class LimiterSlidingWindow<T> implements Limiter<T> {
         historyRequests.add(System.currentTimeMillis());
     }
 
+
     @Override
     public void executeOrWait(Runnable runnable) throws ReachedLimitException, InterruptedException {
         executeOrWait(runnable, maxAwaitExecutionTimeInMilliseconds);
     }
+
 
     @Override
     public void executeOrWait(Runnable runnable, long maxTimeWaitInMilliseconds) throws ReachedLimitException, InterruptedException {
@@ -61,6 +63,7 @@ public class LimiterSlidingWindow<T> implements Limiter<T> {
         }
 
         runnable.run();
+        writeHistory();
     }
 
     @Override
@@ -81,13 +84,16 @@ public class LimiterSlidingWindow<T> implements Limiter<T> {
             Thread.sleep(intervalForCheckExecutionInMilliseconds);
         }
 
-        return callable.call();
+        T result = callable.call();
+        writeHistory();
+        return result;
     }
 
     @Override
     public void executeOrThrowException(Runnable runnable) throws ReachedLimitException {
         if (isPossibleSendRequest()) {
             runnable.run();
+            writeHistory();
         } else {
             throw new ReachedLimitException();
         }
@@ -96,11 +102,14 @@ public class LimiterSlidingWindow<T> implements Limiter<T> {
     @Override
     public T executeOrThrowException(Callable<T> callable) throws Exception {
         if (isPossibleSendRequest()) {
-            return callable.call();
+            T result = callable.call();
+            writeHistory();
+            return result;
         } else {
             throw new ReachedLimitException();
         }
     }
+
 
     private void cleanHistory() {
         while (!Thread.interrupted()) {
