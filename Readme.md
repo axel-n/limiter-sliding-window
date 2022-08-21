@@ -33,6 +33,8 @@ compile "io.github.axel-n:limiter-sliding-window:0.1"
 ## Plans
 - [x] integrate deploy to maven repository
 - [x] add example without spring boot
+- [ ] add methods for run something with limiter wrapper 
+- [ ] add tests in concurrency execution
 - [ ] add example with spring boot
 - [ ] add usage with annotation
 - [ ] add ability setup several limiters (for example 30 requests per 1 minute and 5 requests per second) 

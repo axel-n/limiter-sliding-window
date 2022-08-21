@@ -67,26 +67,27 @@ public class LimiterSlidingWindowTest {
         }
 
         double executionTimeSeconds = getExecutionTime(timeAfterTest, timeBeforeTest);
-        double approximatedExecutionTime = getApproximatedExecutionTime(allRequests, maxRequestsPerPeriod);
+        double approximatedExecutionTime = getApproximatedExecutionTime(allRequests, maxRequestsPerPeriod, intervalSeconds);
+        System.out.println(String.format("executionTime=%s(s), approximatedExecutionTime=%s(s)", executionTimeSeconds, approximatedExecutionTime));
         assertTrue(executionTimeSeconds >= approximatedExecutionTime);
 
-        double maxFloorForExecutionTime = calculateMaxFloorExecutionTime(executionTimeSeconds);
+        double maxFloorForExecutionTime = calculateMaxFloorExecutionTime(approximatedExecutionTime);
+        System.out.println(String.format("executionTime=%s(s), maxFloorForExecutionTime=%s(s)", executionTimeSeconds, maxFloorForExecutionTime));
         assertTrue(executionTimeSeconds <= maxFloorForExecutionTime);
     }
 
     private void sendFakeRequestsWithLimiter(int allRequests, int maxRequestsPerPeriod, int intervalSeconds) {
-
-        try (LimiterSlidingWindow limiter = new LimiterSlidingWindow(new LimiterConfigBuilder()
+        LimiterSlidingWindow<Void> limiter = new LimiterSlidingWindow<>(new LimiterConfigBuilder()
                 .setInterval(Duration.ofSeconds(intervalSeconds))
                 .setMaxRequestsInInterval(maxRequestsPerPeriod)
-                .build())
-        ) {
-            TestProducerMyLimiter producer = new TestProducerMyLimiter(limiter, externalService);
+                .build());
 
-            while (statisticService.getCountCountReceivedRequests() != allRequests) {
-                if (limiter.isPossibleSendRequest()) {
-                    producer.sendFakeRequest();
-                }
+        TestProducerMyLimiter producer = new TestProducerMyLimiter(limiter, externalService);
+
+        while (statisticService.getCountCountReceivedRequests() != allRequests) {
+            if (limiter.isPossibleSendRequest()) {
+                producer.sendFakeRequest();
+                limiter.writeHistory();
             }
         }
     }

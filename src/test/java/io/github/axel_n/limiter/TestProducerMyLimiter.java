@@ -15,7 +15,6 @@ public class TestProducerMyLimiter {
     public void sendFakeRequest() {
         externalService.sendFakeRequest();
 
-        // notify limiter
-        limiter.writeHistory();
+        System.out.println("thread " + Thread.currentThread().getName() + ".send new request");
     }
 }
