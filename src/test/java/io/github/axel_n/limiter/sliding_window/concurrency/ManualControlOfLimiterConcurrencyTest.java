@@ -77,6 +77,7 @@ public class ManualControlOfLimiterConcurrencyTest {
             while (statisticService.getCountCountReceivedRequests() != 90) {
                 if (limiter.isPossibleSendRequest()) {
                     producer.sendFakeRequest();
+                    limiter.writeHistory();
                 }
             }
 

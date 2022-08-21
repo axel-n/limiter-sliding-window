@@ -87,6 +87,7 @@ public class LimiterSlidingWindowTest {
         while (statisticService.getCountCountReceivedRequests() != allRequests) {
             if (limiter.isPossibleSendRequest()) {
                 producer.sendFakeRequest();
+                limiter.writeHistory();
             }
         }
     }

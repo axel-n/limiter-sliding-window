@@ -30,15 +30,18 @@ public class AutomaticWaitLimiterConcurrencyTest {
 
         int maxRequestsInPeriod = 2;
 
-        LimiterSlidingWindow<Void> limiter = new LimiterSlidingWindow<>(new LimiterConfigBuilder()
-                .setInterval(Duration.ofSeconds(1))
-                .setMaxRequestsInInterval(maxRequestsInPeriod)
-                .setMaxAwaitExecutionTime(Duration.ofSeconds(10))
-                .setIntervalForCheckExecution(Duration.ofMillis(100))
-                .build());
+        // 2 requests per 1 second
+        // check every 100ms for execution. max wait 10s
+        LimiterSlidingWindow<Void> limiter = new LimiterSlidingWindow<>(
+                new LimiterConfigBuilder()
+                        .setInterval(Duration.ofSeconds(1))
+                        .setMaxRequestsInInterval(maxRequestsInPeriod)
+                        .setMaxAwaitExecutionTime(Duration.ofSeconds(10))
+                        .setIntervalForCheckExecution(Duration.ofMillis(100))
+                        .build()
+        );
 
         TestProducerMyLimiter producer = new TestProducerMyLimiter(limiter, externalService);
-
 
         ExecutorService executorService = Executors.newFixedThreadPool(threads);
 
