@@ -124,26 +124,26 @@ public class LimiterSlidingWindow<T> implements Limiter<T> {
         return result;
     }
 
-//    @Override
-//    public void executeOrThrowException(Runnable runnable) throws ReachedLimitException {
-//        if (isPossibleSendRequest()) {
-//            runnable.run();
-//            writeHistory();
-//        } else {
-//            throw new ReachedLimitException();
-//        }
-//    }
-//
-//    @Override
-//    public T executeOrThrowException(Callable<T> callable) throws Exception {
-//        if (isPossibleSendRequest()) {
-//            T result = callable.call();
-//            writeHistory();
-//            return result;
-//        } else {
-//            throw new ReachedLimitException();
-//        }
-//    }
+    @Override
+    public void executeOrThrowException(Runnable runnable) throws ReachedLimitException {
+        if (isPossibleSendRequest()) {
+            runnable.run();
+            writeHistory();
+        } else {
+            throw new ReachedLimitException();
+        }
+    }
+
+    @Override
+    public T executeOrThrowException(Callable<T> callable) throws Exception {
+        if (isPossibleSendRequest()) {
+            T result = callable.call();
+            writeHistory();
+            return result;
+        } else {
+            throw new ReachedLimitException();
+        }
+    }
 
 
     private void cleanHistory() {

@@ -18,6 +18,6 @@ public interface Limiter<T> {
 
 
     // execute or throw exception
-//    void executeOrThrowException(Runnable runnable) throws ReachedLimitException;
-//    T executeOrThrowException(Callable<T> callable) throws Exception;
+    void executeOrThrowException(Runnable runnable) throws ReachedLimitException;
+    T executeOrThrowException(Callable<T> callable) throws Exception;
 }
