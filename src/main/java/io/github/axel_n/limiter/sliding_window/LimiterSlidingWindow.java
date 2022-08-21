@@ -6,14 +6,14 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class LimiterSlidingWindow<T> implements Limiter<T> {
     private final int maxRequests;
     private final int intervalInMilliseconds;
     private final Queue<Long> historyRequests = new ConcurrentLinkedQueue<>();
 
-    private final AtomicInteger counterRequests = new AtomicInteger(0);
+    private final AtomicReference<Integer> counterRequests = new AtomicReference<>(0);
 
     private final long intervalForCheckExecutionInMilliseconds;
     private final long maxAwaitExecutionTimeInMilliseconds;
@@ -35,12 +35,32 @@ public class LimiterSlidingWindow<T> implements Limiter<T> {
      */
     @Override
     public boolean isPossibleSendRequest() {
-        return counterRequests.incrementAndGet() <= maxRequests;
+        int currentCounter = counterRequests.get();
+
+        if (currentCounter > maxRequests) {
+            return false;
+        }
+
+        while (true) {
+            int latestValue = counterRequests.get();
+
+            if (latestValue >= maxRequests) {
+                return false;
+            }
+
+            if (counterRequests.compareAndSet(latestValue, latestValue + 1)) {
+                return true;
+            }
+        }
     }
 
     @Override
     public void writeHistory() {
-        historyRequests.add(System.currentTimeMillis());
+        writeHistory(System.currentTimeMillis());
+    }
+
+    private void writeHistory(long timestamp) {
+        historyRequests.add(timestamp);
     }
 
 
@@ -54,24 +74,25 @@ public class LimiterSlidingWindow<T> implements Limiter<T> {
 //    public void executeOrWait(Runnable runnable, long maxTimeWaitInMilliseconds) throws ReachedLimitException, TimeoutException {
 //        long timeBeforeAwait = System.currentTimeMillis();
 //
-//        synchronized (this) {
-//            // TODO refactor
-//            while (!isPossibleSendRequest()) {
-//                long now = System.currentTimeMillis();
-//                long diff = now - timeBeforeAwait;
-//                if (diff >= maxTimeWaitInMilliseconds) {
-//                    throw new TimeoutException();
-//                }
-//                try {
-//                    Thread.sleep(intervalForCheckExecutionInMilliseconds);
-//                } catch (InterruptedException ignored) {}
+//        while (!isPossibleSendRequest()) {
+//            long now = System.currentTimeMillis();
+//            long diff = now - timeBeforeAwait;
+//            if (diff >= maxTimeWaitInMilliseconds) {
+//                throw new TimeoutException();
 //            }
-//
-//            runnable.run();
-//            writeHistory();
+//            try {
+//                Thread.sleep(intervalForCheckExecutionInMilliseconds);
+//            } catch (InterruptedException e) {
+//                System.out.println("while sleep, exception=" + e.getMessage());
+//                throw new TimeoutException();
+//            }
 //        }
+//
+//        long now = System.currentTimeMillis();
+//        runnable.run();
+//        writeHistory(now);
 //    }
-
+//
 //    @Override
 //    public T executeOrWait(Callable<T> callable) throws Exception {
 //        return executeOrWait(callable, maxAwaitExecutionTimeInMilliseconds);
@@ -90,14 +111,17 @@ public class LimiterSlidingWindow<T> implements Limiter<T> {
 //
 //            try {
 //                Thread.sleep(intervalForCheckExecutionInMilliseconds);
-//            } catch (Exception ignored) {}
+//            } catch (Exception e) {
+//                System.out.println("while sleep, exception=" + e.getMessage());
+//                throw new TimeoutException();
+//            }
 //        }
-//
+//        long now = System.currentTimeMillis();
 //        T result = callable.call();
-//        writeHistory();
+//        writeHistory(now);
 //        return result;
 //    }
-//
+
 //    @Override
 //    public void executeOrThrowException(Runnable runnable) throws ReachedLimitException {
 //        if (isPossibleSendRequest()) {
@@ -128,11 +152,21 @@ public class LimiterSlidingWindow<T> implements Limiter<T> {
                 for (long current : historyRequests) {
                     if (isOld(now, current, intervalInMilliseconds)) {
                         historyRequests.poll();
-                        counterRequests.decrementAndGet();
+                        decrementFirstCounter();
                     } else {
                         break;
                     }
                 }
+            }
+        }
+    }
+
+    private void decrementFirstCounter() {
+        while (true) {
+            int currentValue = counterRequests.get();
+
+            if (counterRequests.compareAndSet(currentValue, currentValue - 1)) {
+                return;
             }
         }
     }
