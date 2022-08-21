@@ -1,21 +1,19 @@
 package io.github.axel_n.limiter.sliding_window.concurrency;
 
 import io.github.axel_n.limiter.Limiter;
-import io.github.axel_n.limiter.TestProducerMyLimiter;
 import io.github.axel_n.limiter.config.LimiterConfigBuilder;
 import io.github.axel_n.limiter.sliding_window.LimiterSlidingWindow;
+import io.github.axel_n.limiter.test.MockSender;
 import io.github.axel_n.limiter.test.StatisticService;
-import io.github.axel_n.limiter.test.TestExternalService;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static io.github.axel_n.limiter.test.utils.ConcurrencyUtils.calculateCountThreads;
@@ -23,10 +21,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ManualControlOfLimiterConcurrencyTest {
     private final StatisticService statisticService = new StatisticService();
-    private final TestExternalService externalService = new TestExternalService(statisticService);
+    private final MockSender mockSender = new MockSender(statisticService);
+
+    @BeforeEach
+    public void cleanHistory() {
+        statisticService.cleanHistory();
+    }
 
     @Test
-        // TODO how to check cpus in junit
     void sendRequestsWithLimiterInParallel() {
         int threads = calculateCountThreads();
 
@@ -41,42 +43,33 @@ public class ManualControlOfLimiterConcurrencyTest {
                 .setIntervalForCheckExecution(Duration.ofMillis(100))
                 .build());
 
-        TestProducerMyLimiter producer = new TestProducerMyLimiter(limiter, externalService);
-
 
         ExecutorService executorService = Executors.newFixedThreadPool(threads);
 
         List<Future<Boolean>> tasks = new ArrayList<>(threads);
         for (int i = 0; i < threads; i++) {
-            Future<Boolean> future = executorService.submit(createProducer(limiter, producer));
+            Future<Boolean> future = executorService.submit(createProducer(limiter, mockSender));
             tasks.add(future);
         }
 
         for (Future<Boolean> task : tasks) {
             try {
                 task.get(60, TimeUnit.SECONDS);
-            } catch (TimeoutException | RuntimeException | InterruptedException | ExecutionException e) {
-                System.out.println("while wait producer, exception=" + e.getMessage());
+            } catch (Exception ignored) {
             }
         }
 
         executorService.shutdown();
 
         int maxRequestsInTest = statisticService.getMaxRequestsInSeconds();
-
-        List<String> humanReadableStatistics = statisticService.getHumanReadableStatistics();
-        for (String time : humanReadableStatistics) {
-            System.out.println(time);
-        }
-
         assertEquals(maxRequestsInPeriod, maxRequestsInTest);
     }
 
-    private Callable<Boolean> createProducer(Limiter<Void> limiter, TestProducerMyLimiter producer) {
+    private Callable<Boolean> createProducer(Limiter<Void> limiter, MockSender mockSender) {
         return () -> {
-            while (statisticService.getCountCountReceivedRequests() != 90) {
+            while (statisticService.getCountCountReceivedRequests() <= 30) {
                 if (limiter.isPossibleSendRequest()) {
-                    producer.sendFakeRequest();
+                    mockSender.sendFakeRequest();
                     limiter.writeHistory();
                 }
             }

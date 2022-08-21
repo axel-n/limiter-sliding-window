@@ -1,11 +1,10 @@
 package io.github.axel_n.limiter.sliding_window.concurrency;
 
-import io.github.axel_n.limiter.TestProducerMyLimiter;
 import io.github.axel_n.limiter.config.LimiterConfigBuilder;
 import io.github.axel_n.limiter.exception.ReachedLimitException;
 import io.github.axel_n.limiter.sliding_window.LimiterSlidingWindow;
+import io.github.axel_n.limiter.test.MockSender;
 import io.github.axel_n.limiter.test.StatisticService;
-import io.github.axel_n.limiter.test.TestExternalService;
 import java.time.Duration;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ThrowExceptionLimiterConcurrencyTest {
     private final StatisticService statisticService = new StatisticService();
-    private final TestExternalService externalService = new TestExternalService(statisticService);
+    private final MockSender mockSender = new MockSender(statisticService);
 
     @Test
     void sendRequestsWithLimiterInParallel() throws Exception {
@@ -28,15 +27,15 @@ public class ThrowExceptionLimiterConcurrencyTest {
                         .build()
         );
 
-        TestProducerMyLimiter producer = new TestProducerMyLimiter(limiter, externalService);
-
         // emulate already busy limiter
-        limiter.executeOrWait(producer::sendFakeRequest);
+        limiter.executeOrWait(mockSender::sendFakeRequest);
 
         for (int i = 0; i < 5; i++) {
             assertThrows(ReachedLimitException.class, () -> {
                 limiter.executeOrThrowException(() -> true);
             });
         }
+
+        System.out.println("ThrowExceptionLimiterConcurrencyTest finished");
     }
 }

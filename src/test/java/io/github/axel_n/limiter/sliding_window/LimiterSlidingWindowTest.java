@@ -1,9 +1,8 @@
 package io.github.axel_n.limiter.sliding_window;
 
-import io.github.axel_n.limiter.TestProducerMyLimiter;
 import io.github.axel_n.limiter.config.LimiterConfigBuilder;
+import io.github.axel_n.limiter.test.MockSender;
 import io.github.axel_n.limiter.test.StatisticService;
-import io.github.axel_n.limiter.test.TestExternalService;
 import java.time.Duration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class LimiterSlidingWindowTest {
     private final StatisticService statisticService = new StatisticService();
-    private final TestExternalService externalService = new TestExternalService(statisticService);
+    private final MockSender mockSender = new MockSender(statisticService);
 
     @BeforeEach
     public void cleanHistory() {
@@ -77,16 +76,15 @@ public class LimiterSlidingWindowTest {
     }
 
     private void sendFakeRequestsWithLimiter(int allRequests, int maxRequestsPerPeriod, int intervalSeconds) {
-        LimiterSlidingWindow<Void> limiter = new LimiterSlidingWindow<>(new LimiterConfigBuilder()
-                .setInterval(Duration.ofSeconds(intervalSeconds))
-                .setMaxRequestsInInterval(maxRequestsPerPeriod)
-                .build());
+        LimiterSlidingWindow<Void> limiter = new LimiterSlidingWindow<>(
+                new LimiterConfigBuilder()
+                        .setInterval(Duration.ofSeconds(intervalSeconds))
+                        .setMaxRequestsInInterval(maxRequestsPerPeriod)
+                        .build());
 
-        TestProducerMyLimiter producer = new TestProducerMyLimiter(limiter, externalService);
-
-        while (statisticService.getCountCountReceivedRequests() != allRequests) {
+        while (statisticService.getCountCountReceivedRequests() < allRequests) {
             if (limiter.isPossibleSendRequest()) {
-                producer.sendFakeRequest();
+                mockSender.sendFakeRequest();
                 limiter.writeHistory();
             }
         }

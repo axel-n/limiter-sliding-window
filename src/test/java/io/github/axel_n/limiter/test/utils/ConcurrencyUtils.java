@@ -6,7 +6,7 @@ public class ConcurrencyUtils {
         int availableProcessors = Runtime.getRuntime().availableProcessors();
 
         int threads = 2; // minimum
-        if (availableProcessors >= 4) {
+        if (availableProcessors >= 3) {
             threads = availableProcessors - 1;
         }
 
