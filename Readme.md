@@ -17,13 +17,13 @@ So application need to know (fast, without sent packets to any additional system
 <dependency>
     <groupId>io.github.axel-n</groupId>
     <artifactId>limiter-sliding-window</artifactId>
-    <version>0.1</version>
+    <version>0.2</version>
 </dependency>
 ```
 
 ### add dependency for Gradle
 ```
-compile "io.github.axel-n:limiter-sliding-window:0.1"
+compile "io.github.axel-n:limiter-sliding-window:0.2"
 ```
 
 ## How it works sliding window algorithm
@@ -33,8 +33,8 @@ compile "io.github.axel-n:limiter-sliding-window:0.1"
 ## Plans
 - [x] integrate deploy to maven repository
 - [x] add example without spring boot
-- [ ] add methods for run something with limiter wrapper 
-- [ ] add tests in concurrency execution
+- [x] add methods for run something with limiter wrapper 
+- [x] add tests in concurrency execution
 - [ ] add example with spring boot
 - [ ] add usage with annotation
 - [ ] add ability setup several limiters (for example 30 requests per 1 minute and 5 requests per second) 
