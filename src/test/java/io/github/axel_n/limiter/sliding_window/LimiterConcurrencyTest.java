@@ -81,9 +81,17 @@ public class LimiterConcurrencyTest {
 
     private Callable<Boolean> createProducer(Limiter<Void> limiter, TestProducerMyLimiter producer) {
         return () -> {
-            while (statisticService.getCountCountReceivedRequests() != 30) {
+            int counter = 0;
+            while (counter != 30) {
                 System.out.println("thread " + Thread.currentThread().getName() + ".send new request");
-                limiter.executeOrWait(producer::sendFakeRequest);
+                //limiter.executeOrWait(producer::sendFakeRequest);
+
+                if (limiter.isPossibleSendRequest()) {
+                    producer.sendFakeRequest();
+                    limiter.writeHistory();
+                }
+
+                counter++;
             }
 
             return true;
