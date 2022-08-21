@@ -2,10 +2,13 @@ package io.github.axel_n.limiter.sliding_window;
 
 import io.github.axel_n.limiter.Limiter;
 import io.github.axel_n.limiter.config.LimiterConfig;
+import io.github.axel_n.limiter.exception.ReachedLimitException;
 import java.util.Queue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class LimiterSlidingWindow<T> implements Limiter<T> {
@@ -41,7 +44,7 @@ public class LimiterSlidingWindow<T> implements Limiter<T> {
             return false;
         }
 
-        while (true) {
+        while (!Thread.interrupted()) {
             int latestValue = counterRequests.get();
 
             if (latestValue >= maxRequests) {
@@ -52,6 +55,7 @@ public class LimiterSlidingWindow<T> implements Limiter<T> {
                 return true;
             }
         }
+        return false;
     }
 
     @Override
@@ -64,63 +68,61 @@ public class LimiterSlidingWindow<T> implements Limiter<T> {
     }
 
 
-//    @Override
-//    public void executeOrWait(Runnable runnable) throws ReachedLimitException, TimeoutException {
-//        executeOrWait(runnable, maxAwaitExecutionTimeInMilliseconds);
-//    }
-//
-//
-//    @Override
-//    public void executeOrWait(Runnable runnable, long maxTimeWaitInMilliseconds) throws ReachedLimitException, TimeoutException {
-//        long timeBeforeAwait = System.currentTimeMillis();
-//
-//        while (!isPossibleSendRequest()) {
-//            long now = System.currentTimeMillis();
-//            long diff = now - timeBeforeAwait;
-//            if (diff >= maxTimeWaitInMilliseconds) {
-//                throw new TimeoutException();
-//            }
-//            try {
-//                Thread.sleep(intervalForCheckExecutionInMilliseconds);
-//            } catch (InterruptedException e) {
-//                System.out.println("while sleep, exception=" + e.getMessage());
-//                throw new TimeoutException();
-//            }
-//        }
-//
-//        long now = System.currentTimeMillis();
-//        runnable.run();
-//        writeHistory(now);
-//    }
-//
-//    @Override
-//    public T executeOrWait(Callable<T> callable) throws Exception {
-//        return executeOrWait(callable, maxAwaitExecutionTimeInMilliseconds);
-//    }
-//
-//    @Override
-//    public T executeOrWait(Callable<T> callable, long maxTimeWaitInMilliseconds) throws Exception {
-//        long timeBeforeAwait = System.currentTimeMillis();
-//
-//        while (!isPossibleSendRequest()) {
-//            long now = System.currentTimeMillis();
-//            long diff = now - timeBeforeAwait;
-//            if (diff >= maxTimeWaitInMilliseconds) {
-//                throw new InterruptedException();
-//            }
-//
-//            try {
-//                Thread.sleep(intervalForCheckExecutionInMilliseconds);
-//            } catch (Exception e) {
-//                System.out.println("while sleep, exception=" + e.getMessage());
-//                throw new TimeoutException();
-//            }
-//        }
-//        long now = System.currentTimeMillis();
-//        T result = callable.call();
-//        writeHistory(now);
-//        return result;
-//    }
+    @Override
+    public void executeOrWait(Runnable runnable) throws ReachedLimitException, TimeoutException {
+        executeOrWait(runnable, maxAwaitExecutionTimeInMilliseconds);
+    }
+
+
+    @Override
+    public void executeOrWait(Runnable runnable, long maxTimeWaitInMilliseconds) throws ReachedLimitException, TimeoutException {
+        long timeBeforeAwait = System.currentTimeMillis();
+
+        while (!isPossibleSendRequest()) {
+            long now = System.currentTimeMillis();
+            long diff = now - timeBeforeAwait;
+            if (diff >= maxTimeWaitInMilliseconds) {
+                throw new TimeoutException();
+            }
+            try {
+                Thread.sleep(intervalForCheckExecutionInMilliseconds);
+            } catch (InterruptedException e) {
+                throw new TimeoutException();
+            }
+        }
+
+        long now = System.currentTimeMillis();
+        runnable.run();
+        writeHistory(now);
+    }
+
+    @Override
+    public T executeOrWait(Callable<T> callable) throws Exception {
+        return executeOrWait(callable, maxAwaitExecutionTimeInMilliseconds);
+    }
+
+    @Override
+    public T executeOrWait(Callable<T> callable, long maxTimeWaitInMilliseconds) throws Exception {
+        long timeBeforeAwait = System.currentTimeMillis();
+
+        while (!isPossibleSendRequest()) {
+            long now = System.currentTimeMillis();
+            long diff = now - timeBeforeAwait;
+            if (diff >= maxTimeWaitInMilliseconds) {
+                throw new InterruptedException();
+            }
+
+            try {
+                Thread.sleep(intervalForCheckExecutionInMilliseconds);
+            } catch (InterruptedException e) {
+                throw new InterruptedException();
+            }
+        }
+        long now = System.currentTimeMillis();
+        T result = callable.call();
+        writeHistory(now);
+        return result;
+    }
 
 //    @Override
 //    public void executeOrThrowException(Runnable runnable) throws ReachedLimitException {
@@ -162,7 +164,7 @@ public class LimiterSlidingWindow<T> implements Limiter<T> {
     }
 
     private void decrementFirstCounter() {
-        while (true) {
+        while (!Thread.interrupted()) {
             int currentValue = counterRequests.get();
 
             if (counterRequests.compareAndSet(currentValue, currentValue - 1)) {
