@@ -3,7 +3,7 @@ package io.github.axel_n.limiter.sliding_window;
 import io.github.axel_n.limiter.config.LimiterConfigBuilder;
 import io.github.axel_n.limiter.test.MockSender;
 import io.github.axel_n.limiter.test.StatisticService;
-import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -77,9 +77,8 @@ public class LimiterSlidingWindowTest {
 
     private void sendFakeRequestsWithLimiter(int allRequests, int maxRequestsPerPeriod, int intervalSeconds) {
         LimiterSlidingWindow limiter = new LimiterSlidingWindow(
-                new LimiterConfigBuilder()
-                        .setInterval(Duration.ofSeconds(intervalSeconds))
-                        .setMaxRequestsInInterval(maxRequestsPerPeriod)
+                new LimiterConfigBuilder().setSizeWindow(intervalSeconds, TimeUnit.SECONDS)
+                        .setMaxRequestsInWindow(maxRequestsPerPeriod)
                         .build());
 
         while (statisticService.getCountCountReceivedRequests() < allRequests) {

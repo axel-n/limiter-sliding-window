@@ -5,7 +5,7 @@ import io.github.axel_n.limiter.exception.ReachedLimitException;
 import io.github.axel_n.limiter.sliding_window.LimiterSlidingWindow;
 import io.github.axel_n.limiter.test.MockSender;
 import io.github.axel_n.limiter.test.StatisticService;
-import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -19,11 +19,10 @@ public class ThrowExceptionLimiterConcurrencyTest {
         int maxRequestsInPeriod = 1;
 
         // 1 requests per 60 second
-        // check every 100ms for execution. max wait 10s
         LimiterSlidingWindow limiter = new LimiterSlidingWindow(
                 new LimiterConfigBuilder()
-                        .setInterval(Duration.ofSeconds(60))
-                        .setMaxRequestsInInterval(maxRequestsInPeriod)
+                        .setSizeWindow(60, TimeUnit.SECONDS)
+                        .setMaxRequestsInWindow(maxRequestsInPeriod)
                         .build()
         );
 

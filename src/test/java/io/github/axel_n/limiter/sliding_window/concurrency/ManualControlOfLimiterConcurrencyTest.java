@@ -5,7 +5,6 @@ import io.github.axel_n.limiter.config.LimiterConfigBuilder;
 import io.github.axel_n.limiter.sliding_window.LimiterSlidingWindow;
 import io.github.axel_n.limiter.test.MockSender;
 import io.github.axel_n.limiter.test.StatisticService;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -38,10 +37,10 @@ public class ManualControlOfLimiterConcurrencyTest {
         // check every 100ms for execution. max wait 10s
         LimiterSlidingWindow limiter = new LimiterSlidingWindow(
                 new LimiterConfigBuilder()
-                        .setInterval(Duration.ofSeconds(1))
-                        .setMaxRequestsInInterval(maxRequestsInPeriod)
-                        .setMaxAwaitExecutionTime(Duration.ofSeconds(10))
-                        .setIntervalForCheckExecution(Duration.ofMillis(100))
+                        .setSizeWindow(1, TimeUnit.SECONDS)
+                        .setMaxRequestsInWindow(maxRequestsInPeriod)
+                        .setMaxAwaitExecutionTime(10, TimeUnit.SECONDS)
+                        .setPeriodForCheckExecution(100, TimeUnit.MILLISECONDS)
                         .build()
         );
 

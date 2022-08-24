@@ -39,3 +39,4 @@ compile "io.github.axel-n:limiter-sliding-window:0.2"
 - [ ] add usage with annotation
 - [ ] add ability setup several limiters (for example 30 requests per 1 minute and 5 requests per second) 
 - [ ] add integration with monitoring 
+- [ ] add normal logging

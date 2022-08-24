@@ -14,20 +14,20 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class LimiterSlidingWindow implements Limiter {
     private final int maxRequests;
-    private final int intervalInMilliseconds;
+    private final int sizeWindowInMilliseconds;
     private final Queue<Long> historyRequests = new ConcurrentLinkedQueue<>();
 
     private final AtomicReference<Integer> counterRequests = new AtomicReference<>(0);
 
-    private final long intervalForCheckExecutionInMilliseconds;
+    private final long periodForCheckExecutionInMilliseconds;
     private final long maxAwaitExecutionTimeInMilliseconds;
     private final String instanceName;
 
     public LimiterSlidingWindow(LimiterConfig config) {
-        this.maxRequests = config.getMaxRequestsInInterval();
-        this.intervalInMilliseconds = (int) config.getInterval().toMillis();
-        this.intervalForCheckExecutionInMilliseconds = config.getIntervalForCheckExecution().toMillis();
-        this.maxAwaitExecutionTimeInMilliseconds = config.getMaxAwaitExecutionTime().toMillis();
+        this.maxRequests = config.getMaxRequestsInWindow();
+        this.sizeWindowInMilliseconds = (int) config.getSizeWindowInMilliseconds();
+        this.periodForCheckExecutionInMilliseconds = config.getPeriodForCheckExecutionInMilliseconds();
+        this.maxAwaitExecutionTimeInMilliseconds = config.getMaxAwaitExecutionTimeInMilliseconds();
         this.instanceName = config.getInstanceName();
 
         ExecutorService cleanHistoryExecutor = Executors.newSingleThreadExecutor();
@@ -88,7 +88,7 @@ public class LimiterSlidingWindow implements Limiter {
                 throw new TimeoutException();
             }
             try {
-                Thread.sleep(intervalForCheckExecutionInMilliseconds);
+                Thread.sleep(periodForCheckExecutionInMilliseconds);
             } catch (InterruptedException e) {
                 throw new TimeoutException();
             }
@@ -116,7 +116,7 @@ public class LimiterSlidingWindow implements Limiter {
             }
 
             try {
-                Thread.sleep(intervalForCheckExecutionInMilliseconds);
+                Thread.sleep(periodForCheckExecutionInMilliseconds);
             } catch (InterruptedException e) {
                 throw new InterruptedException();
             }
@@ -164,7 +164,7 @@ public class LimiterSlidingWindow implements Limiter {
                 long now = System.currentTimeMillis();
 
                 for (long current : historyRequests) {
-                    if (isOld(now, current, intervalInMilliseconds)) {
+                    if (isOld(now, current, sizeWindowInMilliseconds)) {
                         historyRequests.poll();
                         decrementFirstCounter();
                     } else {

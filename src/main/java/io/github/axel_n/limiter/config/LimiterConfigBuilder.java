@@ -1,37 +1,31 @@
 package io.github.axel_n.limiter.config;
 
-import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 public class LimiterConfigBuilder {
-    private Duration interval;
-    private int maxRequestsInInterval;
-    private Duration intervalForCheckExecution;
-    private Duration maxAwaitExecutionTime;
-
+    private long sizeWindowInMilliseconds;
+    private int maxRequestsInWindow;
+    private long periodForCheckExecutionInMilliseconds;
+    private long maxAwaitExecutionTimeInMilliseconds;
     private String instanceName;
 
-    private final Duration DEFAULT_INTERVAL_FOR_CHECK_EXECUTION = Duration.ofMillis(100);
-    private final Duration DEFAULT_MAX_AWAIT_EXECUTION_TIME = Duration.ofSeconds(30);
-
-    private final String DEFAULT_INSTANCE_NAME = "common";
-
-    public LimiterConfigBuilder setInterval(Duration interval) {
-        this.interval = interval;
+    public LimiterConfigBuilder setSizeWindow(int sizeWindow, TimeUnit interval) {
+        this.sizeWindowInMilliseconds = interval.toMillis(sizeWindow);
         return this;
     }
 
-    public LimiterConfigBuilder setMaxRequestsInInterval(int maxRequestsInInterval) {
-        this.maxRequestsInInterval = maxRequestsInInterval;
+    public LimiterConfigBuilder setMaxRequestsInWindow(int maxRequestsInWindow) {
+        this.maxRequestsInWindow = maxRequestsInWindow;
         return this;
     }
 
-    public LimiterConfigBuilder setMaxAwaitExecutionTime(Duration maxAwaitExecutionTime) {
-        this.maxAwaitExecutionTime = maxAwaitExecutionTime;
+    public LimiterConfigBuilder setMaxAwaitExecutionTime(int maxAwaitExecutionTime, TimeUnit interval) {
+        this.maxAwaitExecutionTimeInMilliseconds = interval.toMillis(maxAwaitExecutionTime);
         return this;
     }
 
-    public LimiterConfigBuilder setIntervalForCheckExecution(Duration intervalForCheckExecution) {
-        this.intervalForCheckExecution = intervalForCheckExecution;
+    public LimiterConfigBuilder setPeriodForCheckExecution(int intervalForCheckExecution, TimeUnit interval) {
+        this.periodForCheckExecutionInMilliseconds = interval.toMillis(intervalForCheckExecution);
         return this;
     }
 
@@ -41,19 +35,25 @@ public class LimiterConfigBuilder {
     }
 
     public LimiterConfig build() {
-        if (intervalForCheckExecution == null) {
-            intervalForCheckExecution = DEFAULT_INTERVAL_FOR_CHECK_EXECUTION;
+        if (periodForCheckExecutionInMilliseconds <= 0) {
+            periodForCheckExecutionInMilliseconds = TimeUnit.MILLISECONDS.toMillis(100);
         }
 
-        if (maxAwaitExecutionTime == null) {
-            maxAwaitExecutionTime = DEFAULT_MAX_AWAIT_EXECUTION_TIME;
+        if (maxAwaitExecutionTimeInMilliseconds <= 0) {
+            maxAwaitExecutionTimeInMilliseconds = TimeUnit.SECONDS.toMillis(30);
         }
 
         if (instanceName == null) {
-            instanceName = DEFAULT_INSTANCE_NAME;
+            instanceName = "common";
         }
 
-        return new LimiterConfig(interval, maxRequestsInInterval, intervalForCheckExecution, maxAwaitExecutionTime, instanceName);
+        return new LimiterConfig(
+                sizeWindowInMilliseconds,
+                maxRequestsInWindow,
+                periodForCheckExecutionInMilliseconds,
+                maxAwaitExecutionTimeInMilliseconds,
+                instanceName
+        );
     }
 
 

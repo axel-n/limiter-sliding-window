@@ -1,37 +1,40 @@
 package io.github.axel_n.limiter.config;
 
-import java.time.Duration;
-
 public class LimiterConfig {
 
-    private final Duration interval;
-    private final int maxRequestsInInterval;
-    private final Duration intervalForCheckExecution;
-    private final Duration maxAwaitExecutionTime;
+    private final long sizeWindowInMilliseconds;
+    private final int maxRequestsInWindow;
+    private final long periodForCheckExecutionInMilliseconds;
+    private final long maxAwaitExecutionTimeInMilliseconds;
     private final String instanceName;
 
-    public LimiterConfig(Duration interval, int maxRequestsInInterval, Duration intervalForCheckExecution, Duration maxAwaitExecutionTime, String instanceName) {
-        this.interval = interval;
-        this.maxRequestsInInterval = maxRequestsInInterval;
-        this.intervalForCheckExecution = intervalForCheckExecution;
-        this.maxAwaitExecutionTime = maxAwaitExecutionTime;
+    public LimiterConfig(long sizeWindowInMilliseconds,
+                         int maxRequestsInWindow,
+                         long periodForCheckExecutionInMilliseconds,
+                         long maxAwaitExecutionTimeInMilliseconds,
+                         String instanceName
+    ) {
+        this.sizeWindowInMilliseconds = sizeWindowInMilliseconds;
+        this.maxRequestsInWindow = maxRequestsInWindow;
+        this.periodForCheckExecutionInMilliseconds = periodForCheckExecutionInMilliseconds;
+        this.maxAwaitExecutionTimeInMilliseconds = maxAwaitExecutionTimeInMilliseconds;
         this.instanceName = instanceName;
     }
 
-    public Duration getInterval() {
-        return interval;
+    public long getSizeWindowInMilliseconds() {
+        return sizeWindowInMilliseconds;
     }
 
-    public int getMaxRequestsInInterval() {
-        return maxRequestsInInterval;
+    public int getMaxRequestsInWindow() {
+        return maxRequestsInWindow;
     }
 
-    public Duration getMaxAwaitExecutionTime() {
-        return maxAwaitExecutionTime;
+    public long getPeriodForCheckExecutionInMilliseconds() {
+        return periodForCheckExecutionInMilliseconds;
     }
 
-    public Duration getIntervalForCheckExecution() {
-        return intervalForCheckExecution;
+    public long getMaxAwaitExecutionTimeInMilliseconds() {
+        return maxAwaitExecutionTimeInMilliseconds;
     }
 
     public String getInstanceName() {
