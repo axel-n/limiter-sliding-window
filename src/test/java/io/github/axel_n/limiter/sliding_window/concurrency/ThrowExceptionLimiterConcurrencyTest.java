@@ -20,7 +20,7 @@ public class ThrowExceptionLimiterConcurrencyTest {
 
         // 1 requests per 60 second
         // check every 100ms for execution. max wait 10s
-        LimiterSlidingWindow<Boolean> limiter = new LimiterSlidingWindow<>(
+        LimiterSlidingWindow limiter = new LimiterSlidingWindow(
                 new LimiterConfigBuilder()
                         .setInterval(Duration.ofSeconds(60))
                         .setMaxRequestsInInterval(maxRequestsInPeriod)
@@ -35,7 +35,5 @@ public class ThrowExceptionLimiterConcurrencyTest {
                 limiter.executeOrThrowException(() -> true);
             });
         }
-
-        System.out.println("ThrowExceptionLimiterConcurrencyTest finished");
     }
 }

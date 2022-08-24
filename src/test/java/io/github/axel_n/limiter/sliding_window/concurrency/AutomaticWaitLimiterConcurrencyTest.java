@@ -38,7 +38,7 @@ public class AutomaticWaitLimiterConcurrencyTest {
 
         // 2 requests per 1 second
         // check every 100ms for execution. max wait 10s
-        LimiterSlidingWindow<Void> limiter = new LimiterSlidingWindow<>(
+        LimiterSlidingWindow limiter = new LimiterSlidingWindow(
                 new LimiterConfigBuilder()
                         .setInterval(Duration.ofSeconds(1))
                         .setMaxRequestsInInterval(maxRequestsInPeriod)
@@ -68,7 +68,7 @@ public class AutomaticWaitLimiterConcurrencyTest {
         assertEquals(maxRequestsInPeriod, maxRequestsInTest);
     }
 
-    private Callable<Boolean> createProducer(Limiter<Void> limiter, MockSender producer) {
+    private Callable<Boolean> createProducer(Limiter limiter, MockSender producer) {
         return () -> {
             while (statisticService.getCountCountReceivedRequests() <= 30) {
                 limiter.executeOrWait(producer::sendFakeRequest);

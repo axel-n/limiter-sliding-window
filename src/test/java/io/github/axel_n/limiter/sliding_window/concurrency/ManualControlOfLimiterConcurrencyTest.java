@@ -36,12 +36,14 @@ public class ManualControlOfLimiterConcurrencyTest {
 
         // 2 requests per 1 second
         // check every 100ms for execution. max wait 10s
-        LimiterSlidingWindow<Void> limiter = new LimiterSlidingWindow<>(new LimiterConfigBuilder()
-                .setInterval(Duration.ofSeconds(1))
-                .setMaxRequestsInInterval(maxRequestsInPeriod)
-                .setMaxAwaitExecutionTime(Duration.ofSeconds(10))
-                .setIntervalForCheckExecution(Duration.ofMillis(100))
-                .build());
+        LimiterSlidingWindow limiter = new LimiterSlidingWindow(
+                new LimiterConfigBuilder()
+                        .setInterval(Duration.ofSeconds(1))
+                        .setMaxRequestsInInterval(maxRequestsInPeriod)
+                        .setMaxAwaitExecutionTime(Duration.ofSeconds(10))
+                        .setIntervalForCheckExecution(Duration.ofMillis(100))
+                        .build()
+        );
 
 
         ExecutorService executorService = Executors.newFixedThreadPool(threads);
@@ -65,7 +67,7 @@ public class ManualControlOfLimiterConcurrencyTest {
         assertEquals(maxRequestsInPeriod, maxRequestsInTest);
     }
 
-    private Callable<Boolean> createProducer(Limiter<Void> limiter, MockSender mockSender) {
+    private Callable<Boolean> createProducer(Limiter limiter, MockSender mockSender) {
         return () -> {
             while (statisticService.getCountCountReceivedRequests() <= 30) {
                 if (limiter.isPossibleSendRequest()) {
