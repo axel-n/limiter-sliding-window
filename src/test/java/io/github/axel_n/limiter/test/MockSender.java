@@ -8,7 +8,7 @@ public class MockSender {
     }
 
     public void sendFakeRequest() {
-        System.out.println("thread=" + Thread.currentThread().getName() + " .send new request");
+        System.out.println("thread=" + Thread.currentThread().getName() + ". send new request");
 
         long timeReceivedRequest = System.currentTimeMillis();
 

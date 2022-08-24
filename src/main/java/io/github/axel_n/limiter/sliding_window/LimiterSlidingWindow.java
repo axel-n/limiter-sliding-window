@@ -2,6 +2,7 @@ package io.github.axel_n.limiter.sliding_window;
 
 import io.github.axel_n.limiter.Limiter;
 import io.github.axel_n.limiter.config.LimiterConfig;
+import io.github.axel_n.limiter.dto.LimiterType;
 import io.github.axel_n.limiter.exception.ReachedLimitException;
 import java.util.Queue;
 import java.util.concurrent.Callable;
@@ -11,7 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class LimiterSlidingWindow<T> implements Limiter<T> {
+public class LimiterSlidingWindow implements Limiter {
     private final int maxRequests;
     private final int intervalInMilliseconds;
     private final Queue<Long> historyRequests = new ConcurrentLinkedQueue<>();
@@ -20,12 +21,14 @@ public class LimiterSlidingWindow<T> implements Limiter<T> {
 
     private final long intervalForCheckExecutionInMilliseconds;
     private final long maxAwaitExecutionTimeInMilliseconds;
+    private final String instanceName;
 
     public LimiterSlidingWindow(LimiterConfig config) {
         this.maxRequests = config.getMaxRequestsInInterval();
         this.intervalInMilliseconds = (int) config.getInterval().toMillis();
         this.intervalForCheckExecutionInMilliseconds = config.getIntervalForCheckExecution().toMillis();
         this.maxAwaitExecutionTimeInMilliseconds = config.getMaxAwaitExecutionTime().toMillis();
+        this.instanceName = config.getInstanceName();
 
         ExecutorService cleanHistoryExecutor = Executors.newSingleThreadExecutor();
         cleanHistoryExecutor.execute(this::cleanHistory);
@@ -97,12 +100,12 @@ public class LimiterSlidingWindow<T> implements Limiter<T> {
     }
 
     @Override
-    public T executeOrWait(Callable<T> callable) throws Exception {
+    public <T> T executeOrWait(Callable<T> callable) throws Exception {
         return executeOrWait(callable, maxAwaitExecutionTimeInMilliseconds);
     }
 
     @Override
-    public T executeOrWait(Callable<T> callable, long maxTimeWaitInMilliseconds) throws Exception {
+    public <T> T executeOrWait(Callable<T> callable, long maxTimeWaitInMilliseconds) throws Exception {
         long timeBeforeAwait = System.currentTimeMillis();
 
         while (!isPossibleSendRequest()) {
@@ -135,7 +138,7 @@ public class LimiterSlidingWindow<T> implements Limiter<T> {
     }
 
     @Override
-    public T executeOrThrowException(Callable<T> callable) throws Exception {
+    public <T> T executeOrThrowException(Callable<T> callable) throws Exception {
         if (isPossibleSendRequest()) {
             T result = callable.call();
             writeHistory();
@@ -145,6 +148,15 @@ public class LimiterSlidingWindow<T> implements Limiter<T> {
         }
     }
 
+    @Override
+    public LimiterType getLimiterType() {
+        return LimiterType.SLIDING_WINDOW;
+    }
+
+    @Override
+    public String getInstanceName() {
+        return instanceName;
+    }
 
     private void cleanHistory() {
         while (!Thread.interrupted()) {

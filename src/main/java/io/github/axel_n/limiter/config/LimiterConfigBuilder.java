@@ -8,8 +8,12 @@ public class LimiterConfigBuilder {
     private Duration intervalForCheckExecution;
     private Duration maxAwaitExecutionTime;
 
+    private String instanceName;
+
     private final Duration DEFAULT_INTERVAL_FOR_CHECK_EXECUTION = Duration.ofMillis(100);
     private final Duration DEFAULT_MAX_AWAIT_EXECUTION_TIME = Duration.ofSeconds(30);
+
+    private final String DEFAULT_INSTANCE_NAME = "common";
 
     public LimiterConfigBuilder setInterval(Duration interval) {
         this.interval = interval;
@@ -31,6 +35,11 @@ public class LimiterConfigBuilder {
         return this;
     }
 
+    public LimiterConfigBuilder setInstanceName(String instanceName) {
+        this.instanceName = instanceName;
+        return this;
+    }
+
     public LimiterConfig build() {
         if (intervalForCheckExecution == null) {
             intervalForCheckExecution = DEFAULT_INTERVAL_FOR_CHECK_EXECUTION;
@@ -40,7 +49,11 @@ public class LimiterConfigBuilder {
             maxAwaitExecutionTime = DEFAULT_MAX_AWAIT_EXECUTION_TIME;
         }
 
-        return new LimiterConfig(interval, maxRequestsInInterval, intervalForCheckExecution, maxAwaitExecutionTime);
+        if (instanceName == null) {
+            instanceName = DEFAULT_INSTANCE_NAME;
+        }
+
+        return new LimiterConfig(interval, maxRequestsInInterval, intervalForCheckExecution, maxAwaitExecutionTime, instanceName);
     }
 
 

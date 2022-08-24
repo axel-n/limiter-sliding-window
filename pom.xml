@@ -6,7 +6,7 @@
 
     <groupId>io.github.axel-n</groupId>
     <artifactId>limiter-sliding-window</artifactId>
-    <version>0.2</version>
+    <version>0.3</version>
     <packaging>jar</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -26,10 +26,16 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <junit.version>5.9.0</junit.version>
+        <aspectjweaver.version>1.9.9.1</aspectjweaver.version>
     </properties>
 
-
     <dependencies>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>${aspectjweaver.version}</version>
+        </dependency>
+
         <!-- for tests -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>

@@ -8,12 +8,14 @@ public class LimiterConfig {
     private final int maxRequestsInInterval;
     private final Duration intervalForCheckExecution;
     private final Duration maxAwaitExecutionTime;
+    private final String instanceName;
 
-    public LimiterConfig(Duration interval, int maxRequestsInInterval, Duration intervalForCheckExecution, Duration maxAwaitExecutionTime) {
+    public LimiterConfig(Duration interval, int maxRequestsInInterval, Duration intervalForCheckExecution, Duration maxAwaitExecutionTime, String instanceName) {
         this.interval = interval;
         this.maxRequestsInInterval = maxRequestsInInterval;
         this.intervalForCheckExecution = intervalForCheckExecution;
         this.maxAwaitExecutionTime = maxAwaitExecutionTime;
+        this.instanceName = instanceName;
     }
 
     public Duration getInterval() {
@@ -30,5 +32,9 @@ public class LimiterConfig {
 
     public Duration getIntervalForCheckExecution() {
         return intervalForCheckExecution;
+    }
+
+    public String getInstanceName() {
+        return instanceName;
     }
 }
