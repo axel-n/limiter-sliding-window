@@ -6,7 +6,7 @@ public class NumberUtils {
     }
 
     public static double calculateMaxFloorExecutionTime(double executionTimeSeconds) {
-        double percentOfMaxFloor = 2; // runner in github actions so slow
+        double percentOfMaxFloor = 4; // runner in github actions so slow
         // TODO provide max percent from environment
 
         double somePercent = (executionTimeSeconds / 100) * percentOfMaxFloor;

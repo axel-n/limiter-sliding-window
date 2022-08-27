@@ -21,9 +21,11 @@ public class LimiterAspect {
 
            if (limiterByName == null) {
                limiterByName = new HashMap<>();
+
            }
 
            limiterByName.put(limiter.getInstanceName(), limiter);
+           limitersByImplementation.put(limiter.getLimiterType(), limiterByName);
         }
 
         this.limiters = limitersByImplementation;
