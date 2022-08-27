@@ -3,6 +3,7 @@
 [![Java CI with Maven](https://github.com/axel-n/limiter-sliding-window/actions/workflows/tests.yml/badge.svg)](https://github.com/axel-n/limiter-sliding-window/actions/workflows/tests.yml)
 
 ## Why need another rate limiter?
+
 - this rate limiter is based on the algorithm sliding window
 - not found any solution in popular libraries (bucket4j, resilience4j, guava)
 
@@ -20,14 +21,14 @@ skip
 <dependency>
     <groupId>io.github.axel-n</groupId>
     <artifactId>limiter-sliding-window</artifactId>
-    <version>0.2</version>
+    <version>0.3</version>
 </dependency>
 ```
 
 ### add dependency for Gradle
 
 ```
-compile "io.github.axel-n:limiter-sliding-window:0.2"
+compile "io.github.axel-n:limiter-sliding-window:0.3"
 ```
 
 ## Usage
