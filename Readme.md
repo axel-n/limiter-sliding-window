@@ -64,6 +64,7 @@ limiter.executeOrWait(() -> {
 - [x] add tests in concurrency execution
 - [x] add example with spring boot
 - [x] add usage with annotation
+- [ ] increase code coverage
 - [ ] load values from values in specific environments (like slow github runner)
 - [ ] add ability setup several limiters (for example 30 requests per 1 minute and 5 requests per second) 
 - [ ] add integration with monitoring 
