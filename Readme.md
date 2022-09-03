@@ -1,6 +1,9 @@
 # Rate limiter with sliding window algorithm
 
 [![Java CI with Maven](https://github.com/axel-n/limiter-sliding-window/actions/workflows/tests.yml/badge.svg)](https://github.com/axel-n/limiter-sliding-window/actions/workflows/tests.yml)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.axel-n/limiter-sliding-window.svg)](https://search.maven.org/artifact/io.github.axel-n/limiter-sliding-window/ "Maven Central")
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/mfvanek/pg-index-health/blob/master/LICENSE "Apache License 2.0")
+[![javadoc](https://javadoc.io/badge2/io.github.axel-n/limiter-sliding-window/javadoc.svg)](https://javadoc.io/doc/io.github.axel-n/limiter-sliding-window "javadoc")
 
 ## Why need another rate limiter?
 
